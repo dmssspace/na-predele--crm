@@ -9,6 +9,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import ruRU from "antd/locale/ru_RU";
 
 type ColorModeContextType = {
   mode: string;
@@ -65,6 +66,7 @@ export const ColorModeContextProvider: React.FC<
           ...RefineThemes.Blue,
           algorithm: mode === "light" ? defaultAlgorithm : darkAlgorithm,
         }}
+        locale={ruRU}
       >
         <AntdApp>{children}</AntdApp>
       </ConfigProvider>

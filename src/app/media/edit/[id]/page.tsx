@@ -3,22 +3,18 @@
 import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input } from "antd";
 
-export default function CategoryEdit() {
-  const { formProps, saveButtonProps } = useForm({});
+export default function MediaEdit() {
+  const { formProps, saveButtonProps, query } = useForm({});
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="vertical">
         <Form.Item
-          label={"Title"}
-          name={["title"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          label={"Метаданные"}
+          name={"metadata"}
+          rules={[{ required: true }]}
         >
-          <Input />
+            <Input />
         </Form.Item>
       </Form>
     </Edit>

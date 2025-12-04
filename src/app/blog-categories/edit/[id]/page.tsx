@@ -1,16 +1,17 @@
 "use client";
 
-import { Create, useForm } from "@refinedev/antd";
+import { use } from "react";
+import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input } from "antd";
 
-export default function CategoryCreate() {
+export default function CategoryEdit() {
   const { formProps, saveButtonProps } = useForm({});
 
   return (
-    <Create saveButtonProps={saveButtonProps}>
+    <Edit saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="vertical">
         <Form.Item
-          label={"Title"}
+          label={"Название"}
           name={["title"]}
           rules={[
             {
@@ -21,6 +22,6 @@ export default function CategoryCreate() {
           <Input />
         </Form.Item>
       </Form>
-    </Create>
+    </Edit>
   );
 }

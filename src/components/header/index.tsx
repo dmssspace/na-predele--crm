@@ -16,10 +16,14 @@ import React, { useContext } from "react";
 const { Text } = Typography;
 const { useToken } = theme;
 
+// TODO: дополнить интерфейс
 type IUser = {
-  id: number;
-  name: string;
-  avatar: string;
+  uuid: string;
+  role: string;
+  email: string;
+  phone_number?: string;
+  customer_profile?: unknown;
+  trainer_profile?: unknown;
 };
 
 export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
@@ -53,10 +57,11 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
           onChange={() => setMode(mode === "light" ? "dark" : "light")}
           defaultChecked={mode === "dark"}
         />
-        {(user?.name || user?.avatar) && (
+        {user?.email && (
           <Space style={{ marginLeft: "8px" }} size="middle">
-            {user?.name && <Text strong>{user.name}</Text>}
-            {user?.avatar && <Avatar src={user?.avatar} alt={user?.name} />}
+            {user?.email && <Text strong>{user.email}</Text>}
+
+            <Avatar alt={user?.email} />
           </Space>
         )}
       </Space>

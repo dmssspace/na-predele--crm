@@ -1,71 +1,93 @@
 "use client";
 
+import { humanizeBlogCategoryTitle } from "@lib/format/humanize";
 import {
-  DateField,
+  DateField, // TODO: использовать для полей с датой
   DeleteButton,
   EditButton,
   List,
-  MarkdownField,
   ShowButton,
+  TextField,
   useTable,
 } from "@refinedev/antd";
-import { type BaseRecord, useMany } from "@refinedev/core";
+import { type BaseRecord } from "@refinedev/core";
 import { Space, Table } from "antd";
 
 export default function BlogPostList() {
   const { result, tableProps } = useTable({
     syncWithLocation: true,
-  });
-
-  const {
-    result: { data: categories },
-    query: { isLoading: categoryIsLoading },
-  } = useMany({
-    resource: "categories",
-    ids: result?.data?.map((item) => item?.category?.id).filter(Boolean) ?? [],
-    queryOptions: {
-      enabled: !!result?.data,
-    },
+    resource: "blog",
   });
 
   return (
     <List>
       <Table {...tableProps} rowKey="id">
         <Table.Column dataIndex="id" title={"ID"} />
-        <Table.Column dataIndex="title" title={"Title"} />
+        <Table.Column dataIndex="title" title={"Заголовок"} />
         <Table.Column
-          dataIndex="content"
-          title={"Content"}
-          render={(value: any) => {
+          dataIndex="clipping"
+          title={"Содержание"}
+          render={(value: string) => {
             if (!value) return "-";
-            return <MarkdownField value={value.slice(0, 80) + "..."} />;
+
+            return <TextField value={value.slice(0, 80) + "..."} />;
           }}
         />
         <Table.Column
           dataIndex={"category"}
-          title={"Category"}
-          render={(value) =>
-            categoryIsLoading ? (
-              <>Loading...</>
+          title={"Категория"}
+          render={(_, record: BaseRecord) =>
+            record?.categories && record?.categories.length > 0 ? (
+              humanizeBlogCategoryTitle(record?.categories[0].title)
             ) : (
-              categories?.find((item) => item.id === value?.id)?.title
+              <>-</>
             )
           }
         />
-        <Table.Column dataIndex="status" title={"Status"} />
+        <Table.Column dataIndex="user_id" title={"ID автора"} />
         <Table.Column
-          dataIndex={["createdAt"]}
-          title={"Created at"}
-          render={(value: any) => <DateField value={value} />}
+          dataIndex="type"
+          title={"Тип"}
+          render={(value: string) => {
+            if (value === "post") {
+              return "Пост";
+            }
+
+            if (value === "video") {
+              return "Пост с видео";
+            }
+
+            if (value === "gallery") {
+              return "Пост с галереей";
+            }
+          }}
         />
         <Table.Column
-          title={"Actions"}
+          dataIndex="status"
+          title={"Статус"}
+          render={(value: string) => {
+            if (value === "draft") {
+              return "Черновик";
+            }
+
+            if (value === "published") {
+              return "Опубликовано";
+            }
+
+            return "-";
+          }}
+        />
+        <Table.Column dataIndex="published_at" title={"Дата публикации"} />
+        {/* <Table.Column dataIndex="created_at" title={"Дата создания"} /> */}
+        <Table.Column dataIndex="updated_at" title={"Дата обновления"} />
+        <Table.Column
+          title={"Действия"}
           dataIndex="actions"
           render={(_, record: BaseRecord) => (
             <Space>
-              <EditButton hideText size="small" recordItemId={record.id} />
-              <ShowButton hideText size="small" recordItemId={record.id} />
-              <DeleteButton hideText size="small" recordItemId={record.id} />
+              <EditButton hideText size="small" recordItemId={record.uuid} />
+              <ShowButton hideText size="small" recordItemId={record.uuid} />
+              <DeleteButton hideText size="small" recordItemId={record.uuid} />
             </Space>
           )}
         />

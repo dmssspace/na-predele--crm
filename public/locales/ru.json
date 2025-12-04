@@ -1,0 +1,185 @@
+{
+  "ID": "ID",
+  "pages": {
+    "login": {
+      "title": "Вход в CRM",
+      "signin": "Войти",
+      "signup": "Зарегистрироваться",
+      "register": "Регистрация",
+      "divider": "или",
+      "fields": {
+        "email": "Эл. почта",
+        "password": "Пароль"
+      },
+      "errors": {
+        "requiredEmail": "Введите эл. почту",
+        "requiredPassword": "Введите пароль",
+        "validEmail": "Некорректный формат эл. почты"
+      },
+      "buttons": {
+        "submit": "Войти",
+        "forgotPassword": "Забыли пароль?",
+        "noAccount": "Нет аккаунта?",
+        "haveAccount": "Уже есть аккаунт?",
+        "rememberMe": "Запомнить меня"
+      }
+    },
+    "forgotPassword": {
+      "title": "Забыл пароль?",
+      "signin": "Войти",
+      "fields": {
+        "email": "Эл. почта"
+      },
+      "errors": {
+        "requiredEmail": "Введите эл. почту",
+        "validEmail": "Некорректный формат эл. почты"
+      },
+      "buttons": {
+        "haveAccount": "Есть аккаунт?",
+        "submit": "Восстановить"
+      }
+    },
+    "register": {
+      "title": "Зарегистрируй аккаунт",
+      "signin": "Войти",
+      "fields": {
+        "email": "Эл. почта",
+        "password": "Пароль"
+      },
+      "errors": {
+        "validEmail": "Некорректный формат эл. почты"
+      },
+      "buttons": {
+        "submit": "Зарегистрироваться",
+        "haveAccount": "Уже есть аккаунт?"
+      }
+    },
+    "updatePassword": {
+      "title": "Изменить пароль",
+      "fields": {
+        "password": "Новый пароль",
+        "confirmPassword": "Повторите новый пароль"
+      },
+      "errors": {
+        "confirmPasswordNotMatch": "Пароли не совпадают"
+      },
+      "buttons": {
+        "submit": "Изменить"
+      }
+    },
+    "error": {
+      "info": "Вы могли забыть добавить {action} в {resource}.",
+      "404": "Увы, страница не найдена.",
+      "resource404": "{resource} не найден.",
+      "backHome": "На главную"
+    }
+  },
+  "actions": {
+    "list": "Список",
+    "create": "Создать",
+    "edit": "Изменить",
+    "show": "Детали",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "cancel": "Отменить"
+  },
+  "buttons": {
+    "create": "Создать",
+    "save": "Сохранить",
+    "logout": "Выйти",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "cancel": "Отменить",
+    "confirm": "Уверен?",
+    "filter": "Фильтр",
+    "clear": "Очистить",
+    "refresh": "Обновить",
+    "show": "Детали",
+    "undo": "Отменить действие",
+    "import": "Импортировать",
+    "clone": "Клонировать",
+    "notAccessTitle": "У тебя недостаточно прав"
+  },
+  "warnWhenUnsavedChanges": "Уверен, что хочешь выйти не сохранив?",
+  "notifications": {
+    "success": "Успешно",
+    "error": "Ошибка (код ошибки: {statusCode})",
+    "undoable": "У вас есть {seconds} секунд чтобы отменить действие",
+    "createSuccess": "{resource} успешно создан",
+    "createError": "Произошла ошибка при создании {resource} (код ошибки: {statusCode})",
+    "deleteSuccess": "{resource} успешно удален",
+    "deleteError": "Ошибка при удалении {resource} (код ошибки: {statusCode})",
+    "editSuccess": "{resource} успешно изменен",
+    "editError": "Ошибка при изменении {resource} (код ошибки: {statusCode})",
+    "importProgress": "Импорт: {processed}/{total}"
+  },
+  "loading": "Загрузка",
+  "tags": {
+    "clone": "Клонировать"
+  },
+  "dashboard": {
+    "title": "Панель управления"
+  },
+  "blog": {
+    "blog_posts": "Blog Posts",
+    "form": {
+      "select": {
+        "category": {
+          "placeholder": "Please select category"
+        }
+      }
+    },
+    "fields": {
+      "id": "Id",
+      "title": "Title",
+      "category": "Category",
+      "status": {
+        "title": "Status",
+        "published": "Published",
+        "draft": "Draft",
+        "rejected": "Rejected"
+      },
+      "content": "Content",
+      "createdAt": "Created At"
+    },
+    "titles": {
+      "create": "Создать пост",
+      "edit": "Изменить пост",
+      "list": "Новости",
+      "show": "Показать пост"
+    }
+  },
+  "blog/categories": {
+    "categories": "Категории новостей",
+    "fields": {
+      "id": "ID",
+      "title": "Название",
+      "created_at": "Создан"
+    },
+    "titles": {
+      "create": "Создать категорию",
+      "edit": "Изменить категорию",
+      "list": "Категории",
+      "show": "Детали категории"
+    }
+  },
+  "media": {
+    "titles": {
+      "create": "Загрузить медиа",
+      "edit": "Изменить медиа",
+      "list": "Список медиа",
+      "show": "Просмотр медиа"
+    }
+  },
+  "customers": {
+    "titles": {
+      "create": "Регистрация клиента",
+      "edit": "Изменить данные клиента",
+      "list": "Список клиентов",
+      "show": "Карточка клиента"
+    }
+  },
+  "table": {
+    "actions": "Действия"
+  }
+}

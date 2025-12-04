@@ -1,6 +1,8 @@
 "use client";
 
+import { humanizeBlogCategoryTitle } from "@lib/format/humanize";
 import { Edit, useForm, useSelect } from "@refinedev/antd";
+import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select } from "antd";
 
 export default function BlogPostEdit() {
@@ -8,16 +10,27 @@ export default function BlogPostEdit() {
 
   const blogPostsData = query?.data?.data;
 
+  const handleFinish = (values: any) => {
+    const transformedValues = {
+      ...values,
+      attached_categories: Array.isArray(values.attached_categories)
+        ? values.attached_categories
+        : [values.attached_categories],
+    };
+    return formProps.onFinish?.(transformedValues);
+  };
+
   const { selectProps: categorySelectProps } = useSelect({
-    resource: "categories",
-    defaultValue: blogPostsData?.category?.id,
+    resource: "blog/categories",
+    optionLabel: "title",
+    optionValue: "uuid",
   });
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
+      <Form {...formProps} layout="vertical" onFinish={handleFinish}>
         <Form.Item
-          label={"Title"}
+          label={"Заголовок"}
           name={["title"]}
           rules={[
             {
@@ -28,32 +41,20 @@ export default function BlogPostEdit() {
           <Input />
         </Form.Item>
         <Form.Item
-          label={"Content"}
-          name="content"
+          label={"Содержание"}
+          name="body"
           rules={[
             {
               required: true,
             },
           ]}
         >
-          <Input.TextArea rows={5} />
+          <MDEditor data-color-mode="light" />
         </Form.Item>
         <Form.Item
-          label={"Category"}
-          name={["category", "id"]}
-          initialValue={formProps?.initialValues?.category?.id}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select {...categorySelectProps} />
-        </Form.Item>
-        <Form.Item
-          label={"Status"}
-          name={["status"]}
-          initialValue={"draft"}
+          label={"Категория"}
+          name="attached_categories"
+          initialValue={formProps?.initialValues?.categories?.[0]?.uuid}
           rules={[
             {
               required: true,
@@ -61,11 +62,31 @@ export default function BlogPostEdit() {
           ]}
         >
           <Select
-            defaultValue={"draft"}
+            {...categorySelectProps}
+            optionRender={({ label }) => {
+              return humanizeBlogCategoryTitle(label?.toString() || "-");
+            }}
+            labelRender={({ label }) => {
+              return humanizeBlogCategoryTitle(label?.toString() || "-");
+            }}
+          />
+        </Form.Item>
+        <Form.Item
+          label={"Тип поста"}
+          name={["type"]}
+          initialValue={"post"}
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        >
+          <Select
+            defaultValue={"post"}
             options={[
-              { value: "draft", label: "Draft" },
-              { value: "published", label: "Published" },
-              { value: "rejected", label: "Rejected" },
+              { value: "post", label: "Пост" },
+              { value: "video", label: "Видеопост" },
+              { value: "gallery", label: "Пост-галлерея" },
             ]}
             style={{ width: 120 }}
           />

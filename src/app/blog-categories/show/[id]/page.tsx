@@ -14,8 +14,14 @@ export default function CategoryShow() {
     <Show isLoading={isLoading}>
       <Title level={5}>{"ID"}</Title>
       <TextField value={record?.id} />
-      <Title level={5}>{"Title"}</Title>
+      <Title level={5}>{"UUID"}</Title>
+      <TextField value={record?.uuid} />
+      <Title level={5}>{"Название"}</Title>
       <TextField value={record?.title} />
+      <Title level={5}>{"Создан"}</Title>
+      <TextField value={record?.created_at} />
+      <Title level={5}>{"Обновлен"}</Title>
+      <TextField value={record?.updated_at} />
     </Show>
   );
 }
