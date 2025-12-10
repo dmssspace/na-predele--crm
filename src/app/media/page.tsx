@@ -5,6 +5,7 @@ import {
   CreateButton,
   DeleteButton,
   EditButton,
+  ImageField,
   List,
   ShowButton,
   useTable,
@@ -49,6 +50,26 @@ export default function MediaList() {
 
             return "-";
           }}
+        />
+        <Table.Column
+          render={(_, record) => {
+            if (record.type === "image") {
+              return (
+                <ImageField
+                  value={record.public_url}
+                  width={120}
+                  height={120}
+                  style={{ objectFit: "cover" }}
+                />
+              );
+            }
+
+            return "-";
+          }
+            
+            
+          }
+          title={"Предпросмотр"}
         />
         <Table.Column
           dataIndex="status"

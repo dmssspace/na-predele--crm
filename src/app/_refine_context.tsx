@@ -14,7 +14,7 @@ import { authProviderClient } from "@providers/auth-provider/auth-provider.clien
 import { dataProvider } from "@providers/data-provider";
 import { useLocale, useTranslations } from "next-intl";
 import { setUserLocale } from "@lib/i18n/i18n";
-import { FileImageOutlined, ReadOutlined, TagOutlined, UserOutlined } from "@ant-design/icons";
+import { FileImageOutlined, IdcardOutlined, ReadOutlined, ShoppingOutlined, TagOutlined, UserOutlined } from "@ant-design/icons";
 
 type Props = {
   themeMode?: string;
@@ -56,19 +56,32 @@ export const RefineContext = ({
                   }
                 },
                 {
-                  name: "blog",
+                  name: "trainers",
+                  list: "/trainers",
+                  create: "/trainers/create",
+                  edit: "/trainers/edit/:id",
+                  show: "/trainers/show/:id",
+                  meta: {
+                    canDelete: true,
+                    label: "Тренеры",
+                    icon: <IdcardOutlined />
+                  }
+                },
+                {
+                  name: "blog-posts",
                   list: "/blog-posts",
                   create: "/blog-posts/create",
                   edit: "/blog-posts/edit/:id",
                   show: "/blog-posts/show/:id",
                   meta: {
                     canDelete: true,
-                    label: "Новости",
+                    parent: "blog",
+                    label: "Посты",
                     icon: <ReadOutlined />
                   },
                 },
                 {
-                  name: "blog/categories",
+                  name: "blog-categories",
                   list: "/blog-categories",
                   create: "/blog-categories/create",
                   edit: "/blog-categories/edit/:id",
@@ -78,6 +91,33 @@ export const RefineContext = ({
                     parent: "blog",
                     label: "Категории",
                     icon: <TagOutlined />
+                  },
+                },
+                {
+                  name: "blog",
+                  meta: {
+                    label: "Блог",
+                    icon: <ReadOutlined />
+                  },
+                },
+                 {
+                  name: "shop-products",
+                  list: "/shop-products",
+                  create: "/shop-products/create",
+                  edit: "/shop-products/edit/:id",
+                  show: "/shop-products/show/:id",
+                  meta: {
+                    canDelete: true,
+                    parent: "shop",
+                    label: "Товары",
+                    icon: <ShoppingOutlined />
+                  },
+                },
+                {
+                  name: "shop",
+                  meta: {
+                    label: "Магазин",
+                    icon: <ShoppingOutlined />
                   },
                 },
                 {

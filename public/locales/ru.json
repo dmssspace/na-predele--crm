@@ -120,36 +120,15 @@
   "dashboard": {
     "title": "Панель управления"
   },
-  "blog": {
-    "blog_posts": "Blog Posts",
-    "form": {
-      "select": {
-        "category": {
-          "placeholder": "Please select category"
-        }
-      }
-    },
-    "fields": {
-      "id": "Id",
-      "title": "Title",
-      "category": "Category",
-      "status": {
-        "title": "Status",
-        "published": "Published",
-        "draft": "Draft",
-        "rejected": "Rejected"
-      },
-      "content": "Content",
-      "createdAt": "Created At"
-    },
+  "blog-posts": {
     "titles": {
       "create": "Создать пост",
       "edit": "Изменить пост",
-      "list": "Новости",
+      "list": "Список постов",
       "show": "Показать пост"
     }
   },
-  "blog/categories": {
+  "blog-categories": {
     "categories": "Категории новостей",
     "fields": {
       "id": "ID",
@@ -177,6 +156,22 @@
       "edit": "Изменить данные клиента",
       "list": "Список клиентов",
       "show": "Карточка клиента"
+    }
+  },
+  "trainers": {
+    "titles": {
+      "create": "Регистрация тренера",
+      "edit": "Изменить данные тренера",
+      "list": "Список тренеров",
+      "show": "Карточка тренера"
+    }
+  },
+  "shop-products": {
+    "titles": {
+      "create": "Добавить товар",
+      "edit": "Изменить товар",
+      "list": "Список товаров",
+      "show": "Карточка товара"
     }
   },
   "table": {
