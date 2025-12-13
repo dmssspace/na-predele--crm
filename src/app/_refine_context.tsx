@@ -2,11 +2,13 @@
 
 import { PropsWithChildren, Suspense } from "react";
 
-import { useNotificationProvider } from "@refinedev/antd";
+import { useNotificationProvider, ThemedLayout } from "@refinedev/antd";
 import { Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider from "@refinedev/nextjs-router";
 import { I18nProvider } from "@refinedev/core";
+import { Header } from "@components/header";
+import { Title } from "@components/title";
 
 import { ColorModeContextProvider } from "@contexts/color-mode";
 import { DevtoolsProvider } from "@providers/devtools";
@@ -76,18 +78,6 @@ export const RefineContext = ({
                   },
                 },
                 {
-                  name: "ticket-plans",
-                  list: "/ticket-plans",
-                  edit: "/ticket-plans/edit/:id",
-                  show: "/ticket-plans/show/:id",
-                  meta: {
-                    canDelete: true,
-                    parent: "tickets",
-                    label: "Настройки",
-                    icon: <SettingOutlined />,
-                  },
-                },
-                {
                   name: "tickets",
                   meta: {
                     label: "Абонементы",
@@ -95,29 +85,15 @@ export const RefineContext = ({
                   },
                 },
                 {
-                  name: "blog-posts",
-                  list: "/blog-posts",
-                  create: "/blog-posts/create",
-                  edit: "/blog-posts/edit/:id",
-                  show: "/blog-posts/show/:id",
+                  name: "tickets/plans",
+                  list: "/tickets/plans",
+                  edit: "/tickets/plans/edit/:id",
+                  show: "/tickets/plans/show/:id",
                   meta: {
-                    canDelete: true,
-                    parent: "blog",
-                    label: "Посты",
-                    icon: <ReadOutlined />,
-                  },
-                },
-                {
-                  name: "blog-categories",
-                  list: "/blog-categories",
-                  create: "/blog-categories/create",
-                  edit: "/blog-categories/edit/:id",
-                  show: "/blog-categories/show/:id",
-                  meta: {
-                    canDelete: true,
-                    parent: "blog",
-                    label: "Категории",
-                    icon: <TagOutlined />,
+                    canDelete: false,
+                    parent: "tickets",
+                    label: "Управление тарифами",
+                    icon: <SettingOutlined />,
                   },
                 },
                 {
@@ -128,22 +104,49 @@ export const RefineContext = ({
                   },
                 },
                 {
-                  name: "shop-products",
-                  list: "/shop-products",
-                  create: "/shop-products/create",
-                  edit: "/shop-products/edit/:id",
-                  show: "/shop-products/show/:id",
+                  name: "blog",
+                  identifier: "blog/posts",
+                  list: "/blog",
+                  create: "/blog/create",
+                  edit: "/blog/edit/:id",
+                  show: "/blog/show/:id",
                   meta: {
                     canDelete: true,
-                    parent: "shop",
-                    label: "Товары",
-                    icon: <ShoppingOutlined />,
+                    parent: "blog",
+                    label: "Посты",
+                    icon: <ReadOutlined />,
+                  },
+                },
+                {
+                  name: "blog/categories",
+                  list: "/blog/categories",
+                  create: "/blog/categories/create",
+                  edit: "/blog/categories/edit/:id",
+                  show: "/blog/categories/show/:id",
+                  meta: {
+                    canDelete: true,
+                    parent: "blog",
+                    label: "Категории",
+                    icon: <TagOutlined />,
                   },
                 },
                 {
                   name: "shop",
                   meta: {
                     label: "Магазин",
+                    icon: <ShoppingOutlined />,
+                  },
+                },
+                {
+                  name: "shop/products",
+                  list: "/shop/products",
+                  create: "/shop/products/create",
+                  edit: "/shop/products/edit/:id",
+                  show: "/shop/products/show/:id",
+                  meta: {
+                    canDelete: true,
+                    parent: "shop",
+                    label: "Товары",
                     icon: <ShoppingOutlined />,
                   },
                 },
