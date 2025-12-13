@@ -12,7 +12,11 @@ export default async function Layout({ children }: React.PropsWithChildren) {
     return redirect(data?.redirectTo || "/login");
   }
 
-  return <>{children}</>;
+  return (
+    <ThemedLayout Header={Header} Title={Title}>
+      {children}
+    </ThemedLayout>
+  );
 }
 
 async function getData() {
