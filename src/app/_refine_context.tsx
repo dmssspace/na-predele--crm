@@ -14,7 +14,15 @@ import { authProviderClient } from "@providers/auth-provider/auth-provider.clien
 import { dataProvider } from "@providers/data-provider";
 import { useLocale, useTranslations } from "next-intl";
 import { setUserLocale } from "@lib/i18n/i18n";
-import { FileImageOutlined, IdcardOutlined, ReadOutlined, ShoppingOutlined, TagOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  FileImageOutlined,
+  IdcardOutlined,
+  ReadOutlined,
+  SettingOutlined,
+  ShoppingOutlined,
+  TagOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 
 type Props = {
   themeMode?: string;
@@ -52,8 +60,8 @@ export const RefineContext = ({
                   meta: {
                     canDelete: true,
                     label: "Клиенты",
-                    icon: <UserOutlined />
-                  }
+                    icon: <UserOutlined />,
+                  },
                 },
                 {
                   name: "trainers",
@@ -64,8 +72,27 @@ export const RefineContext = ({
                   meta: {
                     canDelete: true,
                     label: "Тренеры",
-                    icon: <IdcardOutlined />
-                  }
+                    icon: <IdcardOutlined />,
+                  },
+                },
+                {
+                  name: "ticket-plans",
+                  list: "/ticket-plans",
+                  edit: "/ticket-plans/edit/:id",
+                  show: "/ticket-plans/show/:id",
+                  meta: {
+                    canDelete: true,
+                    parent: "tickets",
+                    label: "Настройки",
+                    icon: <SettingOutlined />,
+                  },
+                },
+                {
+                  name: "tickets",
+                  meta: {
+                    label: "Абонементы",
+                    icon: <FileImageOutlined />,
+                  },
                 },
                 {
                   name: "blog-posts",
@@ -77,7 +104,7 @@ export const RefineContext = ({
                     canDelete: true,
                     parent: "blog",
                     label: "Посты",
-                    icon: <ReadOutlined />
+                    icon: <ReadOutlined />,
                   },
                 },
                 {
@@ -90,17 +117,17 @@ export const RefineContext = ({
                     canDelete: true,
                     parent: "blog",
                     label: "Категории",
-                    icon: <TagOutlined />
+                    icon: <TagOutlined />,
                   },
                 },
                 {
                   name: "blog",
                   meta: {
                     label: "Блог",
-                    icon: <ReadOutlined />
+                    icon: <ReadOutlined />,
                   },
                 },
-                 {
+                {
                   name: "shop-products",
                   list: "/shop-products",
                   create: "/shop-products/create",
@@ -110,14 +137,14 @@ export const RefineContext = ({
                     canDelete: true,
                     parent: "shop",
                     label: "Товары",
-                    icon: <ShoppingOutlined />
+                    icon: <ShoppingOutlined />,
                   },
                 },
                 {
                   name: "shop",
                   meta: {
                     label: "Магазин",
-                    icon: <ShoppingOutlined />
+                    icon: <ShoppingOutlined />,
                   },
                 },
                 {
@@ -129,7 +156,7 @@ export const RefineContext = ({
                   meta: {
                     canDelete: true,
                     label: "Медиа",
-                    icon: <FileImageOutlined />
+                    icon: <FileImageOutlined />,
                   },
                 },
               ]}
