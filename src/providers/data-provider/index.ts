@@ -146,6 +146,68 @@ const dp = (
       data: data.data,
     };
   },
+  custom: async ({
+    url,
+    method,
+    filters,
+    sorters,
+    payload,
+    query,
+    headers,
+  }) => {
+    let requestUrl = `${apiURL}/${url}`;
+
+    if (sorters) {
+      const generatedSort = generateSort(sorters);
+      if (generatedSort) {
+        const { _sort, _order } = generatedSort;
+        const sortQuery = {
+          _sort: _sort.join(","),
+          _order: _order.join(","),
+        };
+        requestUrl = `${requestUrl}?${stringify(sortQuery)}`;
+      }
+    }
+
+    if (filters) {
+      const generatedFilters = generateFilters(filters);
+      requestUrl = `${requestUrl}${
+        requestUrl.includes("?") ? "&" : "?"
+      }${stringify(generatedFilters)}`;
+    }
+
+    if (query) {
+      requestUrl = `${requestUrl}${
+        requestUrl.includes("?") ? "&" : "?"
+      }${stringify(query)}`;
+    }
+
+    let axiosResponse;
+    switch (method) {
+      case "put":
+      case "post":
+      case "patch":
+        axiosResponse = await httpClient[method](requestUrl, payload, {
+          headers,
+        });
+        break;
+      case "delete":
+        axiosResponse = await httpClient.delete(requestUrl, {
+          data: payload,
+          headers,
+        });
+        break;
+      default:
+        axiosResponse = await httpClient.get(requestUrl, {
+          headers,
+        });
+        break;
+    }
+
+    const { data } = axiosResponse;
+
+    return Promise.resolve({ data });
+  },
   getApiUrl: () => apiURL,
 });
 

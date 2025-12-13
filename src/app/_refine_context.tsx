@@ -23,6 +23,7 @@ import {
   SettingOutlined,
   ShoppingOutlined,
   TagOutlined,
+  TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 
@@ -74,14 +75,28 @@ export const RefineContext = ({
                   meta: {
                     canDelete: true,
                     label: "Тренеры",
-                    icon: <IdcardOutlined />,
+                    icon: <TeamOutlined />,
                   },
                 },
                 {
                   name: "tickets",
                   meta: {
                     label: "Абонементы",
-                    icon: <FileImageOutlined />,
+                    icon: <IdcardOutlined />,
+                  },
+                },
+                {
+                  name: "tickets",
+                  identifier: "tickets/tickets",
+                  list: "/tickets",
+                  create: "/tickets/create",
+                  edit: "/tickets/edit/:id",
+                  show: "/tickets/show/:id",
+                  meta: {
+                    canDelete: true,
+                    parent: "tickets",
+                    label: "Абонементы",
+                    icon: <IdcardOutlined />,
                   },
                 },
                 {
