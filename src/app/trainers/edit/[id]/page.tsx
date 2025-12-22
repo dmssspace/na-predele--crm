@@ -53,8 +53,8 @@ export default function TrainerProfileEdit() {
               ? dayjs(data.data.birth_date)
               : undefined,
             gender: data.data.gender || "male",
-            avatar_media_uuid: "10dadc79-5963-4c35-baf9-cbdb19a14ff6", //data.data.avatar_media_uuid,
-            intro_media_uuid: "b47a76bd-8461-46f6-a3c3-4c05da6186c4", //data.data.intro_media_uuid,
+            avatar_media_id: "10dadc79-5963-4c35-baf9-cbdb19a14ff6", //data.data.avatar_media_id,
+            intro_media_id: "b47a76bd-8461-46f6-a3c3-4c05da6186c4", //data.data.intro_media_id,
             spec: data.data.spec || "box",
             training_exp_start_on: data.data.training_exp_start_on
               ? dayjs(data.data.training_exp_start_on)
@@ -218,7 +218,7 @@ export default function TrainerProfileEdit() {
         </Form.Item>
         <Form.Item
           label={"Изображение профиля"}
-          name={["avatar_media_uuid"]}
+          name={["avatar_media_id"]}
           rules={[
             {
               // required: true, // TODO:...
@@ -229,7 +229,7 @@ export default function TrainerProfileEdit() {
         </Form.Item>
         <Form.Item
           label={"Изображение профиля"}
-          name={["intro_media_uuid"]}
+          name={["intro_media_id"]}
           rules={[
             {
               // required: true, // TODO:...

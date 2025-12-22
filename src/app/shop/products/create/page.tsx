@@ -132,7 +132,7 @@ export default function ShopProductCreate() {
             </Text>
           </Space>
         )}
-        <Form.Item label={"Прикрепленные изображения (UUID)"}>
+        <Form.Item label={"Прикрепленные изображения (ID)"}>
           <Form.List name="attached_media">
             {(fields, { add, remove }) => (
               <>
@@ -146,12 +146,12 @@ export default function ShopProductCreate() {
                       {...restField}
                       name={[name]}
                       rules={[
-                        { required: true, message: "Введите UUID изображения" },
+                        { required: true, message: "Введите ID изображения" },
                       ]}
                       style={{ marginBottom: 0 }}
                     >
                       <Input
-                        placeholder="UUID изображения"
+                        placeholder="ID изображения"
                         style={{ width: 400 }}
                       />
                     </Form.Item>

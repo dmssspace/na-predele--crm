@@ -130,7 +130,7 @@
       }
     },
     "fields": {
-      "id": "Id",
+      "id": "ID",
       "title": "Title",
       "category": "Category",
       "status": {
@@ -152,7 +152,7 @@
   "categories": {
     "categories": "Categories",
     "fields": {
-      "id": "Id",
+      "id": "ID",
       "title": "Title",
       "createdAt": "Created At"
     },
@@ -161,6 +161,174 @@
       "edit": "Edit Category",
       "list": "Categories",
       "show": "Show Category"
+    }
+  },
+  "schedule": {
+    "titles": {
+      "calendar": "Schedule Calendar",
+      "quick-visit": "Visit Registration",
+      "bookings": "Bookings List",
+      "events": "Schedule Events",
+      "visits": "Visit History"
+    },
+    "calendar": {
+      "week": "Week",
+      "day": "Day",
+      "sessions": "sessions",
+      "noSessions": "No sessions",
+      "details": "Session Details",
+      "trainer": "Trainer",
+      "time": "Time",
+      "type": "Type",
+      "specialization": "Specialization",
+      "capacity": "Capacity",
+      "participants": "Participants",
+      "noBookings": "No bookings yet",
+      "book": "Book",
+      "cancelSession": "Cancel Session"
+    },
+    "quickVisit": {
+      "title": "Register Visit",
+      "subtitle": "Quick customer visit registration",
+      "search": "Customer Search",
+      "searchPlaceholder": "Name, phone or scan card...",
+      "customerFound": "Customer Found",
+      "selectTicket": "Select Membership",
+      "noTickets": "Customer has no active memberships",
+      "remaining": "Remaining",
+      "sessions": "sessions",
+      "until": "Until",
+      "registerVisit": "Register Visit",
+      "cancel": "Cancel",
+      "success": "Visit registered!",
+      "tips": {
+        "title": "Tips:",
+        "scanner": "Use card scanner for quick search",
+        "enter": "Press Enter after typing name to search",
+        "check": "Check remaining sessions before registration"
+      }
+    },
+    "bookings": {
+      "title": "Bookings",
+      "subtitle": "Manage customer session bookings",
+      "customer": "Customer",
+      "training": "Training",
+      "dateTime": "Date/Time",
+      "ticket": "Membership",
+      "status": "Status",
+      "actions": "Actions",
+      "noBookings": "No bookings found",
+      "stats": {
+        "total": "Total Bookings",
+        "confirmed": "Confirmed",
+        "pending": "Pending",
+        "withTicket": "With Membership"
+      },
+      "filters": {
+        "searchCustomer": "Search by customer",
+        "searchSession": "Search by session",
+        "reset": "Reset filters"
+      },
+      "registerVisit": "Visit",
+      "cancelBooking": "Cancel",
+      "singlePayment": "Single Payment",
+      "confirmCancel": "Are you sure you want to cancel this booking?"
+    },
+    "events": {
+      "title": "Schedule Events",
+      "subtitle": "Training templates and one-time events",
+      "createRecurring": "Create Recurring Training",
+      "all": "All",
+      "recurring": "Recurring",
+      "once": "One-time",
+      "noEvents": "No events found",
+      "createFirst": "Create first event",
+      "stats": {
+        "total": "Total Events",
+        "recurring": "Recurring",
+        "once": "One-time"
+      },
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "createEvent": {
+      "title": "Create Recurring Training",
+      "subtitle": "Training will be automatically created every week",
+      "trainer": "Trainer",
+      "selectTrainer": "Select trainer",
+      "trainingType": "Training Type",
+      "weekday": "Weekday",
+      "startTime": "Start Time",
+      "duration": "Duration will be calculated automatically",
+      "capacity": "Maximum Participants",
+      "creating": "Creating...",
+      "create": "Create Event",
+      "error": "Event creation error",
+      "types": {
+        "individual": "Individual",
+        "groupAdult": "Group Adult",
+        "groupChild": "Group Child"
+      },
+      "weekdays": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "info": {
+        "title": "How it works:",
+        "auto": "Recurring training automatically appears in schedule every week",
+        "booking": "Clients can book spots through calendar or app",
+        "cancel": "You can cancel specific session without deleting entire event",
+        "duration": "Training duration depends on type (60/90 minutes)"
+      }
+    },
+    "visits": {
+      "title": "Visit History",
+      "subtitle": "Customer attendance tracking",
+      "dateTime": "Date/Time",
+      "customer": "Customer",
+      "trainingType": "Training Type",
+      "ticket": "Membership",
+      "payment": "Payment",
+      "noVisits": "No visits found for selected period",
+      "export": "Export to Excel",
+      "stats": {
+        "total": "Total Visits",
+        "withTicket": "With Membership",
+        "free": "Free",
+        "avgPerDay": "Average per Day"
+      },
+      "filters": {
+        "from": "From",
+        "to": "To"
+      },
+      "noTicket": "No membership",
+      "charged": "Charged",
+      "free": "Free"
+    },
+    "bookModal": {
+      "title": "Book Training Session",
+      "sessionInfo": "Session Information",
+      "fullWarning": "Session is Full",
+      "fullMessage": "All spots are taken. Booking is not possible.",
+      "searchCustomer": "Customer Search",
+      "searchPlaceholder": "Enter customer name...",
+      "find": "Find",
+      "customerSelected": "Customer Selected",
+      "changeCustomer": "Select another customer",
+      "paymentType": "Payment Type",
+      "useTicket": "Use Membership",
+      "singlePayment": "Single Payment",
+      "selectTicket": "Select Membership",
+      "noTickets": "Customer has no active memberships. Select \"Single Payment\".",
+      "booking": "Booking...",
+      "book": "Book",
+      "error": "Booking Error",
+      "availableSpots": "Available Spots"
     }
   },
   "table": {

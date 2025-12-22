@@ -21,26 +21,26 @@ export default function TicketCreate() {
     },
   });
 
-  const selectedPlanUuid = Form.useWatch("ticket_plan_uuid", form);
+  const selectedPlanID = Form.useWatch("ticket_plan_id", form);
 
   const { selectProps: customerSelectProps } = useSelect({
     resource: "customers",
     optionLabel: "full_name",
-    optionValue: "uuid",
+    optionValue: "id",
   });
 
   const { selectProps: ticketPlanSelectProps } = useSelect({
     resource: "tickets/plans",
     optionLabel: "name",
-    optionValue: "uuid",
+    optionValue: "id",
   });
 
   const { selectProps: ticketPlanPackageSelectProps } = useSelect({
-    resource: selectedPlanUuid
-      ? `tickets/plans/${selectedPlanUuid}/packages`
+    resource: selectedPlanID
+      ? `tickets/plans/${selectedPlanID}/packages`
       : "",
     queryOptions: {
-      enabled: !!selectedPlanUuid,
+      enabled: !!selectedPlanID,
     },
     optionLabel: (item) => {
       const duration = item.duration_days ? `${item.duration_days} дней` : "";
@@ -53,7 +53,7 @@ export default function TicketCreate() {
         price ? " - " + price : ""
       }`;
     },
-    optionValue: "uuid",
+    optionValue: "id",
   });
 
   return (
@@ -61,7 +61,7 @@ export default function TicketCreate() {
       <Form {...formProps} layout="vertical">
         <Form.Item
           label={"Клиент"}
-          name={["customer_uuid"]}
+          name={["customer_id"]}
           rules={[
             {
               required: true,
@@ -83,7 +83,7 @@ export default function TicketCreate() {
 
         <Form.Item
           label={"План абонемента"}
-          name={["ticket_plan_uuid"]}
+          name={["ticket_plan_id"]}
           rules={[
             {
               required: true,
@@ -94,7 +94,7 @@ export default function TicketCreate() {
           <Select
             {...ticketPlanSelectProps}
             onChange={() => {
-              form?.setFieldValue("package_uuid", undefined);
+              form?.setFieldValue("package_id", undefined);
             }}
             placeholder="Выберите план абонемента"
           />
@@ -102,7 +102,7 @@ export default function TicketCreate() {
 
         <Form.Item
           label={"Пакет абонемента"}
-          name={["package_uuid"]}
+          name={["package_id"]}
           rules={[
             {
               required: true,
@@ -112,9 +112,9 @@ export default function TicketCreate() {
         >
           <Select
             {...ticketPlanPackageSelectProps}
-            disabled={!selectedPlanUuid}
+            disabled={!selectedPlanID}
             placeholder={
-              selectedPlanUuid
+              selectedPlanID
                 ? "Выберите пакет абонемента"
                 : "Сначала выберите план абонемента"
             }

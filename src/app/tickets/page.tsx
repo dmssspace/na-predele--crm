@@ -30,10 +30,10 @@ export default function TicketList() {
   const { mutate: freezeTicket } = useCustomMutation();
   const { mutate: unfreezeTicket } = useCustomMutation();
 
-  const handleSuspendTicket = (uuid: string) => {
+  const handleSuspendTicket = (id: string) => {
     freezeTicket(
       {
-        url: `tickets/${uuid}/freeze`,
+        url: `tickets/${id}/freeze`,
         method: "post",
         values: {
           duration: "168m",
@@ -58,10 +58,10 @@ export default function TicketList() {
     );
   };
 
-  const handleActivateTicket = (uuid: string) => {
+  const handleActivateTicket = (id: string) => {
     unfreezeTicket(
       {
-        url: `tickets/${uuid}/unfreeze`,
+        url: `tickets/${id}/unfreeze`,
         method: "post",
         values: {},
         successNotification: {
@@ -102,7 +102,7 @@ export default function TicketList() {
                 type="link"
                 size="small"
                 icon={<ArrowRightOutlined />}
-                onClick={() => show("tickets/plans", record.package.plan.uuid)}
+                onClick={() => show("tickets/plans", record.package.plan.id)}
               />
             }
             style={{ height: "100%" }}
@@ -139,7 +139,7 @@ export default function TicketList() {
                 type="link"
                 size="small"
                 icon={<ArrowRightOutlined />}
-                onClick={() => show("customers", record.customer.uuid)}
+                onClick={() => show("customers", record.customer.id)}
               />
             }
             style={{ height: "100%" }}
@@ -189,7 +189,7 @@ export default function TicketList() {
     <List>
       <Table
         {...tableProps}
-        rowKey="uuid"
+        rowKey="id"
         expandable={{
           expandedRowRender,
           rowExpandable: () => true,
@@ -199,7 +199,7 @@ export default function TicketList() {
             const target = event.target as HTMLElement;
             if (!target.closest("button") && !target.closest("a")) {
               const expandIcon = document.querySelector(
-                `[data-row-key="${record.uuid}"] .ant-table-row-expand-icon`
+                `[data-row-key="${record.id}"] .ant-table-row-expand-icon`
               );
               if (expandIcon) {
                 (expandIcon as HTMLElement).click();
@@ -268,20 +268,20 @@ export default function TicketList() {
               <Button
                 size="small"
                 icon={<UserOutlined />}
-                onClick={() => show("customers", record.customer.uuid)}
+                onClick={() => show("customers", record.customer.id)}
                 title="Перейти к клиенту"
               />
               <Button
                 size="small"
                 icon={<FileTextOutlined />}
-                onClick={() => show("tickets/plans", record.package.plan.uuid)}
+                onClick={() => show("tickets/plans", record.package.plan.id)}
                 title="Перейти к тарифу"
               />
               {record.status === "active" && (
                 <Button
                   size="small"
                   icon={<PauseCircleOutlined />}
-                  onClick={() => handleSuspendTicket(record.uuid)}
+                  onClick={() => handleSuspendTicket(record.id)}
                   title="Заморозить абонемент"
                   danger
                 />
@@ -290,7 +290,7 @@ export default function TicketList() {
                 <Button
                   size="small"
                   icon={<PlayCircleOutlined />}
-                  onClick={() => handleActivateTicket(record.uuid)}
+                  onClick={() => handleActivateTicket(record.id)}
                   title="Разморозить абонемент"
                   type="primary"
                 />

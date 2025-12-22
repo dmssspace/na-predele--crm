@@ -78,12 +78,12 @@ export default function ShopProductList() {
           dataIndex="actions"
           render={(_, record: BaseRecord) => (
             <Space>
-              <EditButton hideText size="small" recordItemId={record?.uuid} />
-              <ShowButton hideText size="small" recordItemId={record?.uuid} />
+              <EditButton hideText size="small" recordItemId={record?.id} />
+              <ShowButton hideText size="small" recordItemId={record?.id} />
               <DeleteButton
                 hideText
                 size="small"
-                recordItemId={record?.uuid}
+                recordItemId={record?.id}
                 resource="shop/products"
               />
             </Space>

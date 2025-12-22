@@ -104,8 +104,6 @@ export default function CustomerShow() {
       <ReactPlayer src={record?.intro_url} controls />
       <Title level={5}>{"ID"}</Title>
       <TextField value={record?.id} />
-      <Title level={5}>{"UUID"}</Title>
-      <TextField value={record?.uuid} />
       <Title level={5}>{"ID пользователя"}</Title>
       <TextField value={record?.user_id} />
       <Title level={5}>{"Создан"}</Title>

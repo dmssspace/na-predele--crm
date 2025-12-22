@@ -64,8 +64,6 @@ export default function ShopProductShow() {
       )}
       <Title level={5}>{"ID"}</Title>
       <TextField value={record?.id} />
-      <Title level={5}>{"UUID"}</Title>
-      <TextField value={record?.uuid} />
       <Title level={5}>{"Создан"}</Title>
       <DateField value={record?.created_at} />
       <Title level={5}>{"Обновлен"}</Title>

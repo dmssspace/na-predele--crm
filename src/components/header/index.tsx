@@ -18,7 +18,7 @@ const { useToken } = theme;
 
 // TODO: дополнить интерфейс
 type IUser = {
-  uuid: string;
+  id: string;
   role: string;
   email: string;
   phone_number?: string;

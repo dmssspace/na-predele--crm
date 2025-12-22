@@ -1,0 +1,119 @@
+/* FullCalendar стили для интеграции с Ant Design */
+.fc {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+}
+
+.fc .fc-button {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+  text-transform: capitalize;
+  padding: 4px 15px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.fc .fc-button:hover:not(:disabled) {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.fc .fc-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: #096dd9;
+  border-color: #096dd9;
+}
+
+.fc .fc-button-group {
+  gap: 4px;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border-color: #f0f0f0;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #f0f0f0;
+}
+
+.fc .fc-col-header-cell {
+  background-color: #fafafa;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  padding: 12px 0;
+}
+
+.fc .fc-timegrid-slot {
+  height: 3em;
+}
+
+.fc .fc-timegrid-slot-label {
+  border-color: #f0f0f0;
+}
+
+.fc-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.fc-event:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fc-event-title {
+  font-weight: 500;
+}
+
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #ff4d4f;
+  border-width: 2px;
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: #ff4d4f;
+}
+
+.fc-daygrid-day.fc-day-today,
+.fc-timegrid-col.fc-day-today {
+  background-color: #e6f7ff !important;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.fc-direction-ltr .fc-toolbar > * > :not(:first-child) {
+  margin-left: 0.5em;
+}
+
+/* Кастомные цвета событий */
+.fc-event.fc-event-success {
+  background-color: #52c41a;
+  border-color: #52c41a;
+}
+
+.fc-event.fc-event-warning {
+  background-color: #faad14;
+  border-color: #faad14;
+}
+
+.fc-event.fc-event-error {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+}

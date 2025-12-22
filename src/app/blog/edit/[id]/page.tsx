@@ -23,7 +23,7 @@ export default function BlogPostEdit() {
   const { selectProps: categorySelectProps } = useSelect({
     resource: "blog/categories",
     optionLabel: "title",
-    optionValue: "uuid",
+    optionValue: "id",
   });
 
   return (
@@ -54,7 +54,7 @@ export default function BlogPostEdit() {
         <Form.Item
           label={"Категория"}
           name="attached_categories"
-          initialValue={formProps?.initialValues?.categories?.[0]?.uuid}
+          initialValue={formProps?.initialValues?.categories?.[0]?.id}
           rules={[
             {
               required: true,

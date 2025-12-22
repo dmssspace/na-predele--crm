@@ -13,9 +13,8 @@ import { useEffect, useState } from "react";
 const { Title } = Typography;
 
 interface TicketPlanPackage {
-  id: number;
-  uuid: string;
-  plan_id: number;
+  id: string;
+  plan_id: string;
   duration_days: number;
   price: number;
   total_sessions: number;
@@ -34,10 +33,10 @@ export default function TicketPlanShow() {
 
   useEffect(() => {
     const fetchPackages = async () => {
-      if (record?.uuid) {
+      if (record?.id) {
         try {
           const response = await fetch(
-            `${apiUrl}/tickets/plans/${record.uuid}/packages`,
+            `${apiUrl}/tickets/plans/${record.id}/packages`,
             {
               credentials: "include",
             }
@@ -51,7 +50,7 @@ export default function TicketPlanShow() {
     };
 
     fetchPackages();
-  }, [record?.uuid, apiUrl]);
+  }, [record?.id, apiUrl]);
 
   const humanizeType = (type: string): string => {
     switch (type) {
@@ -89,9 +88,6 @@ export default function TicketPlanShow() {
         <Descriptions.Item label="ID">
           <TextField value={record?.id} />
         </Descriptions.Item>
-        <Descriptions.Item label="UUID">
-          <TextField value={record?.uuid} />
-        </Descriptions.Item>
         <Descriptions.Item label="Название">
           <TextField value={record?.name} />
         </Descriptions.Item>
@@ -128,7 +124,7 @@ export default function TicketPlanShow() {
       <Row gutter={[16, 16]}>
         {packages.length > 0 ? (
           packages.map((pkg) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={pkg.uuid}>
+            <Col xs={24} sm={12} md={8} lg={6} key={pkg.id}>
               <Card
                 size="small"
                 title={`${pkg.duration_days} дней`}

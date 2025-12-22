@@ -49,8 +49,6 @@ export default function CustomerShow() {
     <Show isLoading={isLoading}>
       <Title level={5}>{"ID"}</Title>
       <TextField value={record?.id} />
-      <Title level={5}>{"UUID"}</Title>
-      <TextField value={record?.uuid} />
       <Title level={5}>{"ФИО"}</Title>
       <TextField value={record?.full_name} />
       <Title level={5}>{"Номер телефона"}</Title>

@@ -28,9 +28,8 @@ import { useState } from "react";
 const { Text, Title } = Typography;
 
 interface TicketPlanPackage {
-  id: number;
-  uuid: string;
-  plan_id: number;
+  id: string;
+  plan_id: string;
   duration_days: number;
   price: number;
   total_sessions: number;
@@ -154,7 +153,7 @@ export default function TicketPlanList() {
   };
 
   const expandedRowRender = (record: BaseRecord) => {
-    const packages = expandedPackages[record.uuid] || [];
+    const packages = expandedPackages[record.id] || [];
 
     if (packages.length === 0) {
       return <Text type="secondary">Загрузка пакетов...</Text>;
@@ -163,7 +162,7 @@ export default function TicketPlanList() {
     return (
       <Row gutter={[16, 16]} style={{ padding: "16px 0" }}>
         {packages.map((pkg: TicketPlanPackage) => (
-          <Col xs={24} sm={12} md={8} lg={6} key={pkg.uuid}>
+          <Col xs={24} sm={12} md={8} lg={6} key={pkg.id}>
             <Card
               size="small"
               title={`${pkg.duration_days} дней`}
@@ -178,14 +177,14 @@ export default function TicketPlanList() {
                 <div>
                   <Text type="secondary">Количество тренировок:</Text>
                   <br />
-                  {editingSessions[pkg.uuid] !== undefined ? (
+                  {editingSessions[pkg.id] !== undefined ? (
                     <Space direction="vertical" style={{ width: "100%" }}>
                       <InputNumber
-                        value={editingSessions[pkg.uuid]}
+                        value={editingSessions[pkg.id]}
                         onChange={(value) =>
                           setEditingSessions((prev) => ({
                             ...prev,
-                            [pkg.uuid]: value,
+                            [pkg.id]: value,
                           }))
                         }
                         placeholder="Пусто = неограниченно"
@@ -202,12 +201,12 @@ export default function TicketPlanList() {
                         <Button
                           type="primary"
                           size="small"
-                          loading={isUpdating[`sessions_${pkg.uuid}`]}
+                          loading={isUpdating[`sessions_${pkg.id}`]}
                           onClick={() =>
                             handleSessionsUpdate(
-                              record.uuid,
-                              pkg.uuid,
-                              editingSessions[pkg.uuid]
+                              record.id,
+                              pkg.id,
+                              editingSessions[pkg.id]
                             )
                           }
                         >
@@ -218,7 +217,7 @@ export default function TicketPlanList() {
                           onClick={() =>
                             setEditingSessions((prev) => {
                               const newState = { ...prev };
-                              delete newState[pkg.uuid];
+                              delete newState[pkg.id];
                               return newState;
                             })
                           }
@@ -244,7 +243,7 @@ export default function TicketPlanList() {
                         onClick={() =>
                           setEditingSessions((prev) => ({
                             ...prev,
-                            [pkg.uuid]: pkg.total_sessions,
+                            [pkg.id]: pkg.total_sessions,
                           }))
                         }
                       >
@@ -256,14 +255,14 @@ export default function TicketPlanList() {
                 <div>
                   <Text type="secondary">Цена:</Text>
                   <br />
-                  {editingPrice[pkg.uuid] !== undefined ? (
+                  {editingPrice[pkg.id] !== undefined ? (
                     <Space direction="vertical" style={{ width: "100%" }}>
                       <InputNumber
-                        value={editingPrice[pkg.uuid]}
+                        value={editingPrice[pkg.id]}
                         onChange={(value) =>
                           setEditingPrice((prev) => ({
                             ...prev,
-                            [pkg.uuid]: value || 0,
+                            [pkg.id]: value || 0,
                           }))
                         }
                         style={{ width: "100%" }}
@@ -279,12 +278,12 @@ export default function TicketPlanList() {
                         <Button
                           type="primary"
                           size="small"
-                          loading={isUpdating[pkg.uuid]}
+                          loading={isUpdating[pkg.id]}
                           onClick={() =>
                             handlePriceUpdate(
-                              record.uuid,
-                              pkg.uuid,
-                              editingPrice[pkg.uuid]
+                              record.id,
+                              pkg.id,
+                              editingPrice[pkg.id]
                             )
                           }
                         >
@@ -295,7 +294,7 @@ export default function TicketPlanList() {
                           onClick={() =>
                             setEditingPrice((prev) => {
                               const newState = { ...prev };
-                              delete newState[pkg.uuid];
+                              delete newState[pkg.id];
                               return newState;
                             })
                           }
@@ -321,7 +320,7 @@ export default function TicketPlanList() {
                         onClick={() =>
                           setEditingPrice((prev) => ({
                             ...prev,
-                            [pkg.uuid]: pkg.price,
+                            [pkg.id]: pkg.price,
                           }))
                         }
                       >
@@ -378,8 +377,8 @@ export default function TicketPlanList() {
               setExpandedRowKeys(expandedRowKeys.filter((k) => k !== key));
             } else {
               setExpandedRowKeys([...expandedRowKeys, key]);
-              if (record.uuid && !expandedPackages[record.uuid]) {
-                fetchPackages(record.uuid);
+              if (record.id && !expandedPackages[record.id]) {
+                fetchPackages(record.id);
               }
             }
           },
@@ -389,8 +388,8 @@ export default function TicketPlanList() {
           expandedRowRender,
           expandedRowKeys,
           onExpand: (expanded, record) => {
-            if (expanded && !expandedPackages[record.uuid]) {
-              fetchPackages(record.uuid);
+            if (expanded && !expandedPackages[record.id]) {
+              fetchPackages(record.id);
             }
           },
           rowExpandable: () => true,
@@ -430,8 +429,8 @@ export default function TicketPlanList() {
           width={150}
           render={(_, record: BaseRecord) => (
             <Space>
-              <EditButton hideText size="small" recordItemId={record?.uuid} />
-              <ShowButton hideText size="small" recordItemId={record?.uuid} />
+              <EditButton hideText size="small" recordItemId={record?.id} />
+              <ShowButton hideText size="small" recordItemId={record?.id} />
             </Space>
           )}
         />

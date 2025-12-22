@@ -48,8 +48,8 @@ const dp = (
     const query: {
       page?: number;
       limit?: number;
-      _sort?: string;
-      _order?: string;
+      sort_by?: string;
+      sort_dir?: string;
     } = {};
 
     const generatedPagination = generatePagination(pagination);
@@ -66,8 +66,8 @@ const dp = (
     if (generatedSort) {
       const { _sort, _order } = generatedSort;
 
-      query._sort = _sort.join(",");
-      query._order = _order.join(",");
+      query.sort_by = _sort.join(",");
+      query.sort_dir = _order.join(",");
     }
 
     const generatedFilters = generateFilters(filters);
@@ -162,8 +162,8 @@ const dp = (
       if (generatedSort) {
         const { _sort, _order } = generatedSort;
         const sortQuery = {
-          _sort: _sort.join(","),
-          _order: _order.join(","),
+          sort_by: _sort.join(","),
+          sort_dir: _order.join(","),
         };
         requestUrl = `${requestUrl}?${stringify(sortQuery)}`;
       }

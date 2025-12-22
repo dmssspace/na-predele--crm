@@ -18,8 +18,6 @@ export default function BlogPostShow() {
     <Show isLoading={isLoading}>
       <Title level={5}>{"ID"}</Title>
       <TextField value={record?.id} />
-      <Title level={5}>{"UUID"}</Title>
-      <TextField value={record?.uuid} />
       <Title level={5}>{"Просмотр"}</Title>
       <TextField value={`${"https://localhost:8080"}/blog/${record?.slug}`} />
       <Title level={5}>{"ID автора"}</Title>

@@ -46,8 +46,6 @@ export default function MediaShow() {
     <Show isLoading={isLoading}>
       <Title level={5}>{"ID"}</Title>
       <TextField value={record?.id} />
-      <Title level={5}>{"UUID"}</Title>
-      <TextField value={record?.uuid} />
       <Title level={5}>{"Тип медиа"}</Title>
       <TextField value={humanizeType(record?.type)} />
       <Title level={5}>{"Статус"}</Title>

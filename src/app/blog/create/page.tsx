@@ -21,7 +21,7 @@ export default function BlogPostCreate() {
   const { selectProps: categorySelectProps } = useSelect({
     resource: "blog/categories",
     optionLabel: "title",
-    optionValue: "uuid",
+    optionValue: "id",
   });
 
   return (

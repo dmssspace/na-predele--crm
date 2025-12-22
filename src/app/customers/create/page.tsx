@@ -129,7 +129,7 @@ export default function BlogPostCreate() {
         </Form.Item>
         <Form.Item
           label={"Изображение профиля"}
-          name={["avatar_media_uuid"]}
+          name={["avatar_media_id"]}
           rules={[
             {
               // required: true, // TODO:...

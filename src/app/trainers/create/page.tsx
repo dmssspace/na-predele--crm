@@ -31,8 +31,8 @@ export default function BlogPostCreate() {
       initialValues: {
         gender: "male",
         spec: "box",
-        avatar_media_uuid: "10dadc79-5963-4c35-baf9-cbdb19a14ff6",
-        intro_media_uuid: "b47a76bd-8461-46f6-a3c3-4c05da6186c4",
+        avatar_media_id: "10dadc79-5963-4c35-baf9-cbdb19a14ff6",
+        intro_media_id: "b47a76bd-8461-46f6-a3c3-4c05da6186c4",
       },
       onFinish: async (values: any) => {
         // Note: форматируем дату в DD.MM.YYYY
@@ -223,7 +223,7 @@ export default function BlogPostCreate() {
         </Form.Item>
         <Form.Item
           label={"Изображение профиля"}
-          name={["avatar_media_uuid"]}
+          name={["avatar_media_id"]}
           rules={[
             {
               required: true,
@@ -234,7 +234,7 @@ export default function BlogPostCreate() {
         </Form.Item>
         <Form.Item
           label={"Видео с представлением тренера"}
-          name={["intro_media_uuid"]}
+          name={["intro_media_id"]}
           rules={[
             {
               required: true,

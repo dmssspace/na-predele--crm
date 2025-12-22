@@ -49,7 +49,7 @@ export default function CustomerEdit() {
               middle_name: middleName === "" ? undefined : middleName,
               birth_date: data.data.birth_date ? dayjs(data.data.birth_date) : undefined,
               gender: data.data.gender || "male",
-              avatar_media_uuid: data.data.avatar_media_uuid,
+              avatar_media_id: data.data.avatar_media_id,
             }
           : {},
         onFinish: async (values: any) => {
@@ -129,7 +129,7 @@ export default function CustomerEdit() {
         </Form.Item>
         <Form.Item
           label={"Изображение профиля"}
-          name={["avatar_media_uuid"]}
+          name={["avatar_media_id"]}
           rules={[
             {
               // required: true, // TODO:...

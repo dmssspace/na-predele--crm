@@ -17,8 +17,11 @@ import { dataProvider } from "@providers/data-provider";
 import { useLocale, useTranslations } from "next-intl";
 import { setUserLocale } from "@lib/i18n/i18n";
 import {
+  CalendarOutlined,
+  ClockCircleOutlined,
   FileImageOutlined,
   IdcardOutlined,
+  PhoneOutlined,
   ReadOutlined,
   SettingOutlined,
   ShoppingOutlined,
@@ -55,6 +58,16 @@ export const RefineContext = ({
               authProvider={authProviderClient}
               resources={[
                 {
+                  name: "callback",
+                  identifier: "callback-requests",
+                  list: "/callback",
+                  meta: {
+                    canDelete: false,
+                    label: "Заявки",
+                    icon: <PhoneOutlined />,
+                  },
+                },
+                {
                   name: "customers",
                   list: "/customers",
                   create: "/customers/create",
@@ -76,6 +89,65 @@ export const RefineContext = ({
                     canDelete: true,
                     label: "Тренеры",
                     icon: <TeamOutlined />,
+                  },
+                },
+                {
+                  name: "schedule",
+                  meta: {
+                    label: "Расписание",
+                    icon: <CalendarOutlined />,
+                  },
+                },
+                {
+                  name: "schedule",
+                  identifier: "schedule/calendar",
+                  list: "/schedule",
+                  meta: {
+                    canDelete: false,
+                    parent: "schedule",
+                    label: "Календарь",
+                    icon: <CalendarOutlined />,
+                  },
+                },
+                {
+                  name: "schedule/quick-visit",
+                  list: "/schedule/quick-visit",
+                  meta: {
+                    canDelete: false,
+                    parent: "schedule",
+                    label: "Регистрация визита",
+                    icon: <ClockCircleOutlined />,
+                  },
+                },
+                {
+                  name: "schedule/bookings",
+                  list: "/schedule/bookings",
+                  meta: {
+                    canDelete: false,
+                    parent: "schedule",
+                    label: "Бронирования",
+                    icon: <IdcardOutlined />,
+                  },
+                },
+                {
+                  name: "schedule/events",
+                  list: "/schedule/events",
+                  create: "/schedule/events/create/recurring",
+                  meta: {
+                    canDelete: false,
+                    parent: "schedule",
+                    label: "События",
+                    icon: <SettingOutlined />,
+                  },
+                },
+                {
+                  name: "schedule/visits",
+                  list: "/schedule/visits",
+                  meta: {
+                    canDelete: false,
+                    parent: "schedule",
+                    label: "История визитов",
+                    icon: <ClockCircleOutlined />,
                   },
                 },
                 {
