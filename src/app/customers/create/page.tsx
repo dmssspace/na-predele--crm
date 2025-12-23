@@ -4,6 +4,7 @@ import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useMemo } from "react";
+import { PhoneInput } from "@/components/phone-input";
 
 export default function BlogPostCreate() {
   const { formProps, saveButtonProps } = useForm({
@@ -71,7 +72,7 @@ export default function BlogPostCreate() {
             },
           ]}
         >
-          <Input />
+          <PhoneInput />
         </Form.Item>
         <Form.Item
           label={"Фамилия"}

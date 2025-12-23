@@ -64,7 +64,11 @@ export const CombinedMediaPicker: React.FC<CombinedMediaPickerProps> = ({
   uploaderMode = "picture-card",
 }) => {
   const handleUploadSuccess = (files: MediaFile[]) => {
-    const newIds = files.map((f) => f.id);
+    const newIds = files.filter(f => f && f.id).map((f) => f.id);
+    
+    if (newIds.length === 0) {
+      return; // Нет валидных файлов для обработки
+    }
     
     if (multiple) {
       // Добавляем новые ID к существующим

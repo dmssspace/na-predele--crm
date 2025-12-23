@@ -6,7 +6,8 @@ import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select, DatePicker, Space, Button } from "antd";
 import dayjs from "dayjs";
 import { useMemo } from "react";
-import { MediaSelector } from "@components/media/MediaSelector";
+import { CombinedMediaPicker } from "@/components/media";
+import { PhoneInput } from "@/components/phone-input";
 
 export default function BlogPostCreate() {
   const { formProps, saveButtonProps } = useForm({
@@ -43,6 +44,13 @@ export default function BlogPostCreate() {
           training_exp_start_on: values.training_exp_start_on
             ? dayjs(values.training_exp_start_on).format("DD.MM.YYYY")
             : undefined,
+          // Преобразовываем массив в строку для media ID
+          avatar_media_id: Array.isArray(values.avatar_media_id)
+            ? values.avatar_media_id[0]
+            : values.avatar_media_id,
+          intro_media_id: Array.isArray(values.intro_media_id)
+            ? values.intro_media_id[0]
+            : values.intro_media_id,
         };
 
         try {
@@ -78,7 +86,7 @@ export default function BlogPostCreate() {
             },
           ]}
         >
-          <Input />
+          <PhoneInput />
         </Form.Item>
         <Form.Item
           label={"Фамилия"}
@@ -231,10 +239,11 @@ export default function BlogPostCreate() {
           ]}
           tooltip="Выберите фото тренера для профиля"
         >
-          <MediaSelector
+          <CombinedMediaPicker
             multiple={false}
             accept="image/*"
-            buttonText="Выбрать фото профиля"
+            maxSize={5}
+            uploaderMode="picture-card"
           />
         </Form.Item>
         <Form.Item
@@ -248,10 +257,11 @@ export default function BlogPostCreate() {
           ]}
           tooltip="Выберите видео-представление тренера"
         >
-          <MediaSelector
+          <CombinedMediaPicker
             multiple={false}
             accept="video/*"
-            buttonText="Выбрать видео"
+            maxSize={100}
+            uploaderMode="picture-card"
           />
         </Form.Item>
       </Form>

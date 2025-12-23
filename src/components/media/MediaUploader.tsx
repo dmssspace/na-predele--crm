@@ -146,7 +146,19 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
         },
       });
 
-      const uploadedFile: MediaFile = response.data.data[0];
+      // Проверяем структуру ответа
+      const uploadedMedia = response.data?.data?.uploaded_media;
+      
+      if (!uploadedMedia || !Array.isArray(uploadedMedia) || uploadedMedia.length === 0) {
+        throw new Error("Некорректный ответ от сервера");
+      }
+
+      const uploadedFile: MediaFile = uploadedMedia[0];
+      
+      // Проверяем, что файл имеет необходимые поля
+      if (!uploadedFile.id) {
+        throw new Error("Загруженный файл не имеет ID");
+      }
       
       message.success(`${file.name} успешно загружен`);
       

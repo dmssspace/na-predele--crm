@@ -14,6 +14,7 @@ import { Button, Space, Table } from "antd";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CustomerEditDrawer } from "@/components/customers/CustomerEditDrawer";
+import { Avatar } from "@/components/avatar";
 
 export default function CustomersList() {
   const { result, tableProps } = useTable<Customer>({
@@ -54,7 +55,16 @@ export default function CustomersList() {
         }}
       >
         <Table {...tableProps} rowKey="id">
-          <Table.Column dataIndex="full_name" title={"ФИО"} />
+          <Table.Column
+            dataIndex="full_name"
+            title={"ФИО"}
+            render={(fullName: string, record: BaseRecord) => (
+              <Space size={16}>
+                <Avatar src={record.avatar_url} fullName={fullName} size={40} />
+                <span>{fullName}</span>
+              </Space>
+            )}
+          />
           <Table.Column
             dataIndex={["user", "phone_number"]}
             title={"Номер телефона"}

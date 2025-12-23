@@ -1,6 +1,6 @@
 "use client";
 
-import { UserAddOutlined } from "@ant-design/icons";
+import { CopyOutlined, UserAddOutlined } from "@ant-design/icons";
 import {
   CreateButton,
   DateField, // TODO: использовать для полей с датой
@@ -10,15 +10,38 @@ import {
   ShowButton,
   TextField,
   useTable,
+  useDrawerForm,
 } from "@refinedev/antd";
 import { type BaseRecord } from "@refinedev/core";
-import { Space, Table } from "antd";
+import { Button, Space, Table } from "antd";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
+import { Avatar } from "@/components/avatar";
+import { TrainerEditDrawer } from "@/components/trainers";
 
 export default function BlogPostList() {
   const { result, tableProps } = useTable({
     syncWithLocation: true,
+  });
+
+  const {
+    query: editQuery,
+    formProps,
+    drawerProps,
+    show,
+    id,
+  } = useDrawerForm({
+    action: "edit",
+    resource: "trainers",
+    warnWhenUnsavedChanges: true,
+    successNotification: {
+      message: "Тренер успешно обновлен",
+      type: "success",
+    },
+    errorNotification: {
+      message: "Ошибка при обновлении тренера",
+      type: "error",
+    },
   });
 
   const humanizeTrainingSpec = (spec: string): string => {
@@ -39,20 +62,34 @@ export default function BlogPostList() {
   };
 
   return (
-    <List
-      headerButtons={({ createButtonProps }) => {
-        if (createButtonProps) {
-          return (
-            <CreateButton {...createButtonProps} icon={<UserAddOutlined />}>
-              {"Зарегистрировать тренера"}
-            </CreateButton>
-          );
-        }
-      }}
-    >
-      <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="id" title={"ID"} />
-        <Table.Column dataIndex="full_name" title={"ФИО"} />
+    <>
+      <List
+        headerButtons={({ createButtonProps }) => {
+          if (createButtonProps) {
+            return (
+              <CreateButton {...createButtonProps} icon={<UserAddOutlined />}>
+                {"Зарегистрировать тренера"}
+              </CreateButton>
+            );
+          }
+        }}
+      >
+        <Table {...tableProps} rowKey="id" onRow={(record) => ({
+          onClick: () => {
+            show(record.id);
+          },
+          style: { cursor: "pointer" },
+        })}>
+        <Table.Column
+          dataIndex="full_name"
+          title={"ФИО"}
+          render={(fullName: string, record: BaseRecord) => (
+            <Space size={16}>
+              <Avatar src={record.avatar_url} fullName={fullName} size={40} />
+              <span>{fullName}</span>
+            </Space>
+          )}
+        />
         <Table.Column
           dataIndex="spec"
           title={"Направление"}
@@ -62,21 +99,66 @@ export default function BlogPostList() {
           dataIndex={["user", "phone_number"]}
           title={"Номер телефона"}
           render={(value: string) => {
-            const digits = value.replace(/\D/g, "");
-
-            if (digits.length !== 11 || digits[0] !== "7") {
-              return value;
+            if (value === "") {
+              return "-";
             }
 
-            const code = digits.slice(1, 4);
-            const part1 = digits.slice(4, 7);
-            const part2 = digits.slice(7, 9);
-            const part3 = digits.slice(9, 11);
+            const formatted = value.replace(/\D/g, "");
 
-            return `+7 (${code}) ${part1}-${part2}-${part3}`;
+            if (formatted.length === 11 && formatted.startsWith("7")) {
+              const displayNumber = `+7 (${formatted.slice(
+                1,
+                4
+              )}) ${formatted.slice(4, 7)}-${formatted.slice(
+                7,
+                9
+              )}-${formatted.slice(9, 11)}`;
+
+              return (
+                <Space size="small">
+                  <a href={`tel:+${formatted}`}>{displayNumber}</a>
+                  <Button
+                    type="text"
+                    size="small"
+                    title="Скопировать номер телефона"
+                    icon={<CopyOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigator.clipboard.writeText(displayNumber);
+                    }}
+                  />
+                </Space>
+              );
+            }
+
+            return value;
           }}
         />
-        <Table.Column dataIndex={["user", "email"]} title={"Эл. почта"} />
+        <Table.Column
+          dataIndex={["user", "email"]}
+          title={"Эл. почта"}
+          render={(value: string) => {
+            if (value !== "") {
+              return (
+                <Space size="small">
+                  <a href={`mailto:${value}`}>{value}</a>
+                  <Button
+                    type="text"
+                    size="small"
+                    title="Скопировать эл. почту"
+                    icon={<CopyOutlined />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigator.clipboard.writeText(value);
+                    }}
+                  />
+                </Space>
+              );
+            }
+
+            return "-";
+          }}
+        />
         {/* TODO: пометить когда у человека день рождения */}
         <Table.Column
           dataIndex="birth_date"
@@ -111,13 +193,35 @@ export default function BlogPostList() {
           dataIndex="actions"
           render={(_, record: BaseRecord) => (
             <Space>
-              <EditButton hideText size="small" recordItemId={record.id} />
-              <ShowButton hideText size="small" recordItemId={record.id} />
-              <DeleteButton hideText size="small" recordItemId={record.id} />
+              <EditButton 
+                hideText 
+                size="small" 
+                recordItemId={record.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  show(record.id);
+                }}
+              />
+              <DeleteButton 
+                hideText 
+                size="small" 
+                recordItemId={record.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
             </Space>
           )}
         />
-      </Table>
-    </List>
+        </Table>
+      </List>
+      
+      <TrainerEditDrawer
+        drawerProps={drawerProps}
+        editQuery={editQuery}
+        formProps={formProps}
+        id={id}
+      />
+    </>
   );
 }

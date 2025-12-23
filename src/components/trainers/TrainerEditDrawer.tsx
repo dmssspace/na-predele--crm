@@ -7,12 +7,13 @@ import {
   CalendarOutlined,
   ManOutlined,
   WomanOutlined,
-  CreditCardOutlined,
-  HistoryOutlined,
   CameraOutlined,
+  VideoCameraOutlined,
+  TrophyOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { DateField } from "@refinedev/antd";
-import { useUpdate, useList, useCustom } from "@refinedev/core";
+import { useUpdate } from "@refinedev/core";
 import {
   Card,
   DatePicker,
@@ -26,12 +27,16 @@ import {
   Tag,
   Typography,
   message,
+  Button,
+  Space,
 } from "antd";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
-import { EditableField } from "./EditableField";
+import MDEditor from "@uiw/react-md-editor";
+import ReactPlayer from "react-player";
+import { EditableField } from "../customers/EditableField";
 import { Avatar } from "@/components/avatar";
 import { CombinedMediaPicker } from "@/components/media";
 import { PhoneInput } from "@/components/phone-input";
@@ -39,49 +44,34 @@ import styles from "@/app/customers/customers.module.css";
 
 const { Title, Text } = Typography;
 
-interface CustomerEditDrawerProps {
+interface TrainerEditDrawerProps {
   drawerProps: any;
   editQuery: any;
   formProps: any;
   id: any;
 }
 
-export const CustomerEditDrawer = ({
+export const TrainerEditDrawer = ({
   drawerProps,
   editQuery,
   formProps,
   id,
-}: CustomerEditDrawerProps) => {
+}: TrainerEditDrawerProps) => {
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
-  const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const [selectedAvatarId, setSelectedAvatarId] = useState<string[]>([]);
+  const [introVideoModalOpen, setIntroVideoModalOpen] = useState(false);
+  const [selectedIntroVideoId, setSelectedIntroVideoId] = useState<string[]>(
+    []
+  );
 
-  const { mutate: updateCustomer } = useUpdate();
-
-  const { data: visitsData, isLoading: visitsLoading } = useList({
-    resource: `visits/customer/${id}`,
-    queryOptions: {
-      enabled: !!id,
-    },
-  });
-
-  const { query } = useCustom({
-    url: `/tickets/customer/${id}`,
-    method: "get",
-    queryOptions: {
-      enabled: !!id,
-    },
-  });
-
-  const ticketsIsLoading = query.isLoading;
-  const ticketsData = query.data?.data?.data;
+  const { mutate: updateTrainer } = useUpdate();
 
   const handleSaveField = async (fieldName: string, value: any) => {
     try {
-      await updateCustomer(
+      await updateTrainer(
         {
-          resource: "customers",
+          resource: "trainers",
           id: id!,
           values: { [fieldName]: value },
         },
@@ -103,7 +93,6 @@ export const CustomerEditDrawer = ({
 
   const handleCancelEdit = (fieldName: string) => {
     setEditMode((prev) => ({ ...prev, [fieldName]: false }));
-    setFieldValues((prev) => ({ ...prev, [fieldName]: undefined }));
   };
 
   const handleAvatarClick = () => {
@@ -114,9 +103,9 @@ export const CustomerEditDrawer = ({
 
   const handleAvatarSave = async () => {
     try {
-      await updateCustomer(
+      await updateTrainer(
         {
-          resource: "customers",
+          resource: "trainers",
           id: id!,
           values: {
             avatar_media_id: selectedAvatarId?.[0] || null,
@@ -135,6 +124,55 @@ export const CustomerEditDrawer = ({
       );
     } catch (error) {
       console.error("Update failed:", error);
+    }
+  };
+
+  const handleIntroVideoClick = () => {
+    const currentIntroVideoId = editQuery?.data?.data?.intro_media_id;
+    setSelectedIntroVideoId(currentIntroVideoId ? [currentIntroVideoId] : []);
+    setIntroVideoModalOpen(true);
+  };
+
+  const handleIntroVideoSave = async () => {
+    try {
+      await updateTrainer(
+        {
+          resource: "trainers",
+          id: id!,
+          values: {
+            intro_media_id: selectedIntroVideoId?.[0] || null,
+          },
+        },
+        {
+          onSuccess: () => {
+            message.success("Видео успешно обновлено");
+            setIntroVideoModalOpen(false);
+            editQuery.refetch();
+          },
+          onError: () => {
+            message.error("Ошибка при обновлении видео");
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
+  };
+
+  const humanizeTrainingSpec = (spec: string): string => {
+    switch (spec) {
+      case "box":
+        return "Бокс";
+      case "thai":
+        return "Тайский бокс";
+      case "kickboxing":
+        return "Кикбоксинг";
+      case "mma":
+        return "ММА";
+      case "women_martial_arts":
+        return "Женские единоборства";
+      default:
+        return "-";
     }
   };
 
@@ -168,9 +206,12 @@ export const CustomerEditDrawer = ({
               ? dayjs(editQueryData.data.birth_date)
               : undefined,
             gender: editQueryData.data.gender || "male",
-            avatar_media_id: editQueryData.data.avatar_media_id
-              ? [editQueryData.data.avatar_media_id]
-              : [],
+            spec: editQueryData.data.spec || "box",
+            training_exp_start_on: editQueryData.data.training_exp_start_on
+              ? dayjs(editQueryData.data.training_exp_start_on)
+              : undefined,
+            regalia: editQueryData.data.regalia || [],
+            approach: editQueryData.data.approach || "",
           }
         : {},
       onFinish: async (values: any) => {
@@ -178,6 +219,9 @@ export const CustomerEditDrawer = ({
           ...values,
           birth_date: values.birth_date
             ? dayjs(values.birth_date).format("DD.MM.YYYY")
+            : undefined,
+          training_exp_start_on: values.training_exp_start_on
+            ? dayjs(values.training_exp_start_on).format("DD.MM.YYYY")
             : undefined,
         };
 
@@ -262,9 +306,9 @@ export const CustomerEditDrawer = ({
               const middleName = formProps.form?.getFieldValue("middle_name");
 
               try {
-                await updateCustomer(
+                await updateTrainer(
                   {
-                    resource: "customers",
+                    resource: "trainers",
                     id: id!,
                     values: {
                       first_name: firstName,
@@ -324,6 +368,52 @@ export const CustomerEditDrawer = ({
             }
           />
 
+          <EditableField
+            icon={<TrophyOutlined />}
+            label="Направление"
+            fieldKey="spec"
+            isEditing={editMode.spec}
+            onToggleEdit={() =>
+              setEditMode((prev) => ({
+                ...prev,
+                spec: !prev.spec,
+              }))
+            }
+            onSave={async () => {
+              const spec = formProps.form?.getFieldValue("spec");
+              await handleSaveField("spec", spec);
+            }}
+            onCancel={() => handleCancelEdit("spec")}
+            displayValue={
+              <Text>{humanizeTrainingSpec(editQuery?.data?.data?.spec)}</Text>
+            }
+            editComponent={
+              <Form.Item
+                name={["spec"]}
+                className={styles.formItem}
+                rules={[
+                  {
+                    required: true,
+                    message: "Выберите направление",
+                  },
+                ]}
+              >
+                <Select
+                  options={[
+                    { value: "box", label: "Бокс" },
+                    { value: "thai", label: "Тайский бокс" },
+                    { value: "kickboxing", label: "Кикбоксинг" },
+                    { value: "mma", label: "ММА" },
+                    {
+                      value: "women_martial_arts",
+                      label: "Женские единоборства",
+                    },
+                  ]}
+                />
+              </Form.Item>
+            }
+          />
+
           <Flex gap={8}>
             <EditableField
               icon={<MailOutlined />}
@@ -337,24 +427,8 @@ export const CustomerEditDrawer = ({
                 }))
               }
               onSave={async () => {
-                const email = formProps.form?.getFieldValue("email");
-
-                try {
-                  // TODO: Реализовать отдельный эндпоинт для изменения email
-                  // await fetch(`/api/customers/${id}/update-email`, {
-                  //   method: 'POST',
-                  //   body: JSON.stringify({ email })
-                  // });
-
-                  message.info("Изменение email временно недоступно");
-                  setEditMode((prev) => ({ ...prev, email: false }));
-
-                  // Временно используем общий эндпоинт
-                  // await updateCustomer(...)
-                } catch (error) {
-                  console.error("Update failed:", error);
-                  message.error("Ошибка при обновлении email");
-                }
+                message.info("Изменение email временно недоступно");
+                setEditMode((prev) => ({ ...prev, email: false }));
               }}
               onCancel={() => handleCancelEdit("email")}
               displayValue={
@@ -379,24 +453,8 @@ export const CustomerEditDrawer = ({
                 }))
               }
               onSave={async () => {
-                const phone = formProps.form?.getFieldValue("phone");
-
-                try {
-                  // TODO: Реализовать отдельный эндпоинт для изменения номера телефона
-                  // await fetch(`/api/customers/${id}/update-phone`, {
-                  //   method: 'POST',
-                  //   body: JSON.stringify({ phone_number: phone })
-                  // });
-
-                  message.info("Изменение номера телефона временно недоступно");
-                  setEditMode((prev) => ({ ...prev, phone: false }));
-
-                  // Временно используем общий эндпоинт
-                  // await updateCustomer(...)
-                } catch (error) {
-                  console.error("Update failed:", error);
-                  message.error("Ошибка при обновлении номера телефона");
-                }
+                message.info("Изменение номера телефона временно недоступно");
+                setEditMode((prev) => ({ ...prev, phone: false }));
               }}
               onCancel={() => handleCancelEdit("phone")}
               displayValue={
@@ -468,14 +526,11 @@ export const CustomerEditDrawer = ({
                   rules={[
                     {
                       required: true,
-                      message: "Пожалуйста, выберите дату рождения",
+                      message: "Укажите дату рождения",
                     },
                   ]}
                 >
-                  <DatePicker
-                    maxDate={dayjs()}
-                    className={styles.fullWidthInput}
-                  />
+                  <DatePicker maxDate={dayjs()} style={{ width: "100%" }} />
                 </Form.Item>
               }
             />
@@ -506,9 +561,7 @@ export const CustomerEditDrawer = ({
                 <Text>
                   {editQuery?.data?.data?.gender === "male"
                     ? "Мужской"
-                    : editQuery?.data?.data?.gender === "female"
-                    ? "Женский"
-                    : "-"}
+                    : "Женский"}
                 </Text>
               }
               editComponent={
@@ -518,7 +571,7 @@ export const CustomerEditDrawer = ({
                   rules={[
                     {
                       required: true,
-                      message: "Пожалуйста, выберите пол",
+                      message: "Выберите пол",
                     },
                   ]}
                 >
@@ -527,145 +580,199 @@ export const CustomerEditDrawer = ({
                       { value: "male", label: "Мужской" },
                       { value: "female", label: "Женский" },
                     ]}
-                    className={styles.fullWidthInput}
                   />
                 </Form.Item>
               }
             />
           </Flex>
-        </Form>
 
-        {/* Текущий абонемент */}
-        <Card
-          title={
-            <Flex align="center" gap={8}>
-              <CreditCardOutlined />
-              <Text strong>Текущий абонемент</Text>
-            </Flex>
-          }
-          size="small"
-          style={{ backgroundColor: "white" }}
-          loading={ticketsIsLoading}
-        >
-          {ticketsData && ticketsData.length > 0 ? (
-            (() => {
-              const activeTicket =
-                ticketsData.find((ticket: any) => ticket.status === "active") ||
-                ticketsData[0];
-              return (
-                <Flex vertical gap={8}>
-                  <Flex justify="space-between">
-                    <Text type="secondary">Номер абонемента:</Text>
-                    <Text strong>{activeTicket.ticket_id}</Text>
-                  </Flex>
-                  <Flex justify="space-between">
-                    <Text type="secondary">Тариф:</Text>
-                    <Text strong>
-                      {`${activeTicket.package.plan.name} - ${activeTicket.package.duration_days} дня(-ей)`}
-                    </Text>
-                  </Flex>
-                  <Flex justify="space-between">
-                    <Text type="secondary">Статус:</Text>
-                    <Tag
-                      color={
-                        activeTicket.status === "active"
-                          ? "green"
-                          : activeTicket.status === "expired"
-                          ? "red"
-                          : "orange"
-                      }
-                    >
-                      {activeTicket.status === "active"
-                        ? "Активен"
-                        : activeTicket.status === "expired"
-                        ? "Истёк"
-                        : activeTicket.status}
-                    </Tag>
-                  </Flex>
-                  <Flex justify="space-between">
-                    <Text type="secondary">Осталось визитов:</Text>
-                    <Text>
-                      {activeTicket.remaining_sessions || 0} /{" "}
-                      {activeTicket.package.total_sessions || 0}
-                    </Text>
-                  </Flex>
-                  <Flex justify="space-between">
-                    <Text type="secondary">Действителен до:</Text>
-                    <Text>
-                      {activeTicket.end_date
-                        ? format(
-                            new Date(activeTicket.end_date),
-                            "dd.MM.yyyy",
-                            { locale: ru }
-                          )
-                        : "-"}
-                    </Text>
-                  </Flex>
-                </Flex>
+          <EditableField
+            icon={<CalendarOutlined />}
+            label="Дата начала тренерской деятельности"
+            fieldKey="trainingExpStartOn"
+            isEditing={editMode.trainingExpStartOn}
+            onToggleEdit={() =>
+              setEditMode((prev) => ({
+                ...prev,
+                trainingExpStartOn: !prev.trainingExpStartOn,
+              }))
+            }
+            onSave={async () => {
+              const trainingExpStartOn = formProps.form?.getFieldValue(
+                "training_exp_start_on"
               );
-            })()
-          ) : (
-            <Text type="secondary">Нет активного абонемента</Text>
-          )}
-        </Card>
-
-        {/* История визитов */}
-        <Card
-          title={
-            <Flex align="center" gap={8}>
-              <HistoryOutlined />
-              <Text strong>История визитов</Text>
-            </Flex>
-          }
-          size="small"
-          style={{ backgroundColor: "white" }}
-          loading={visitsLoading}
-        >
-          {visitsData?.data && visitsData.data.length > 0 ? (
-            <List
-              size="small"
-              dataSource={visitsData.data}
-              renderItem={(visit: any) => (
-                <List.Item>
-                  <Flex justify="space-between" style={{ width: "100%" }}>
-                    <Text>
-                      {visit.check_in_time || visit.date || visit.created_at
-                        ? format(
-                            new Date(
-                              visit.check_in_time ||
-                                visit.date ||
-                                visit.created_at
-                            ),
-                            "dd.MM.yyyy HH:mm",
-                            {
-                              locale: ru,
-                            }
-                          )
-                        : "-"}
-                    </Text>
-                    <Tag
-                      color={
-                        visit.status === "checked_in"
-                          ? "blue"
-                          : visit.status === "checked_out"
-                          ? "green"
-                          : "default"
+              const formattedDate = trainingExpStartOn
+                ? dayjs(trainingExpStartOn).format("DD.MM.YYYY")
+                : undefined;
+              await handleSaveField("training_exp_start_on", formattedDate);
+            }}
+            onCancel={() => handleCancelEdit("trainingExpStartOn")}
+            displayValue={
+              <Text>
+                {editQuery?.data?.data?.training_exp_start_on
+                  ? format(
+                      new Date(editQuery.data.data.training_exp_start_on),
+                      "dd.MM.yyyy",
+                      {
+                        locale: ru,
                       }
-                    >
-                      {visit.status === "checked_in"
-                        ? "Вход"
-                        : visit.status === "checked_out"
-                        ? "Выход"
-                        : visit.status || "Визит"}
-                    </Tag>
-                  </Flex>
-                </List.Item>
-              )}
-            />
-          ) : (
-            <Text type="secondary">История визитов пуста</Text>
-          )}
-        </Card>
+                    )
+                  : "-"}
+              </Text>
+            }
+            editComponent={
+              <Form.Item
+                name={["training_exp_start_on"]}
+                className={styles.formItem}
+                rules={[
+                  {
+                    required: true,
+                    message: "Укажите дату начала тренерской деятельности",
+                  },
+                ]}
+              >
+                <DatePicker maxDate={dayjs()} style={{ width: "100%" }} />
+              </Form.Item>
+            }
+          />
+
+          <EditableField
+            icon={<TrophyOutlined />}
+            label="Регалии"
+            fieldKey="regalia"
+            isEditing={editMode.regalia}
+            onToggleEdit={() =>
+              setEditMode((prev) => ({
+                ...prev,
+                regalia: !prev.regalia,
+              }))
+            }
+            onSave={async () => {
+              const regalia = formProps.form?.getFieldValue("regalia");
+              await handleSaveField("regalia", regalia || []);
+            }}
+            onCancel={() => handleCancelEdit("regalia")}
+            displayValue={
+              editQuery?.data?.data?.regalia &&
+              editQuery.data.data.regalia.length > 0 ? (
+                <List
+                  size="small"
+                  dataSource={editQuery.data.data.regalia}
+                  renderItem={(item: string) => (
+                    <List.Item style={{ padding: "4px 0" }}>
+                      <Text>• {item}</Text>
+                    </List.Item>
+                  )}
+                />
+              ) : (
+                <Text type="secondary">Не указаны</Text>
+              )
+            }
+            editComponent={
+              <Form.List name="regalia">
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map(({ key, name, ...restField }) => (
+                      <Space
+                        key={key}
+                        style={{ display: "flex", marginBottom: 8 }}
+                        align="baseline"
+                      >
+                        <Form.Item
+                          {...restField}
+                          name={[name]}
+                          rules={[
+                            { required: true, message: "Введите регалию" },
+                          ]}
+                          style={{ marginBottom: 0, flex: 1 }}
+                        >
+                          <Input placeholder="Регалия" />
+                        </Form.Item>
+                        <Button
+                          type="text"
+                          danger
+                          onClick={() => remove(name)}
+                          icon={<span>✕</span>}
+                        />
+                      </Space>
+                    ))}
+                    <Button type="dashed" onClick={() => add()} block>
+                      Добавить регалию
+                    </Button>
+                  </>
+                )}
+              </Form.List>
+            }
+          />
+
+          <EditableField
+            icon={<FileTextOutlined />}
+            label="Описание особенностей подхода"
+            fieldKey="approach"
+            isEditing={editMode.approach}
+            onToggleEdit={() =>
+              setEditMode((prev) => ({
+                ...prev,
+                approach: !prev.approach,
+              }))
+            }
+            onSave={async () => {
+              const approach = formProps.form?.getFieldValue("approach");
+              await handleSaveField("approach", approach);
+            }}
+            onCancel={() => handleCancelEdit("approach")}
+            displayValue={
+              <div data-color-mode="light">
+                <MDEditor.Markdown
+                  source={editQuery?.data?.data?.approach || "Не указано"}
+                />
+              </div>
+            }
+            editComponent={
+              <Form.Item
+                name={["approach"]}
+                className={styles.formItem}
+                rules={[
+                  {
+                    required: true,
+                    message: "Укажите описание подхода",
+                  },
+                ]}
+              >
+                <MDEditor data-color-mode="light" />
+              </Form.Item>
+            }
+          />
+
+          <Card
+            title={
+              <Flex align="center" gap={8}>
+                <VideoCameraOutlined />
+                <Text strong>Видео-представление</Text>
+              </Flex>
+            }
+            extra={
+              <Button
+                type="link"
+                icon={<CameraOutlined />}
+                onClick={handleIntroVideoClick}
+              >
+                Изменить видео
+              </Button>
+            }
+          >
+            {editQuery?.data?.data?.intro_url ? (
+              <ReactPlayer
+                url={editQuery.data.data.intro_url}
+                controls
+                width="100%"
+                height="300px"
+              />
+            ) : (
+              <Text type="secondary">Видео не загружено</Text>
+            )}
+          </Card>
+        </Form>
       </Flex>
       <Flex
         vertical
@@ -705,6 +812,25 @@ export const CustomerEditDrawer = ({
           multiple={false}
           accept="image/*"
           maxSize={5}
+          uploaderMode="picture-card"
+        />
+      </Modal>
+
+      <Modal
+        title="Изменить видео-представление"
+        open={introVideoModalOpen}
+        onOk={handleIntroVideoSave}
+        onCancel={() => setIntroVideoModalOpen(false)}
+        okText="Сохранить"
+        cancelText="Отмена"
+        width={700}
+      >
+        <CombinedMediaPicker
+          value={selectedIntroVideoId}
+          onChange={setSelectedIntroVideoId}
+          multiple={false}
+          accept="video/*"
+          maxSize={100}
           uploaderMode="picture-card"
         />
       </Modal>
