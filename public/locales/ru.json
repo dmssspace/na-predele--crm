@@ -344,5 +344,10 @@
   },
   "table": {
     "actions": "Действия"
+  },
+  "callback-requests": {
+    "titles": {
+      "list": "Заявки"
+    }
   }
 }

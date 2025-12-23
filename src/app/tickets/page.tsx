@@ -33,7 +33,7 @@ export default function TicketList() {
   const handleSuspendTicket = (id: string) => {
     freezeTicket(
       {
-        url: `tickets/${id}/freeze`,
+        url: `/tickets/${id}/freeze`,
         method: "post",
         values: {
           duration: "168m",
@@ -61,7 +61,7 @@ export default function TicketList() {
   const handleActivateTicket = (id: string) => {
     unfreezeTicket(
       {
-        url: `tickets/${id}/unfreeze`,
+        url: `/tickets/${id}/unfreeze`,
         method: "post",
         values: {},
         successNotification: {

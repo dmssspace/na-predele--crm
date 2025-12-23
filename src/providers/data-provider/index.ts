@@ -155,7 +155,7 @@ const dp = (
     query,
     headers,
   }) => {
-    let requestUrl = `${apiURL}/${url}`;
+    let requestUrl = `${apiURL}${url}`;
 
     if (sorters) {
       const generatedSort = generateSort(sorters);

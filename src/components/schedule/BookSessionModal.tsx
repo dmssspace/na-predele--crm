@@ -52,7 +52,7 @@ export default function BookSessionModal({
   const searchQueryCustom = useCustom<{
     data: CustomerSearchResult[];
   }>({
-    url: "customers/search",
+    url: "/customers/search",
     method: "get",
     config: {
       query: { q: searchQuery },
@@ -67,7 +67,7 @@ export default function BookSessionModal({
 
   // Get active tickets
   const ticketsQueryCustom = useCustom<{ data: Ticket[] }>({
-    url: "tickets",
+    url: "/tickets",
     method: "get",
     config: {
       query: {

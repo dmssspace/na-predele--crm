@@ -42,7 +42,7 @@ export default function SchedulePage() {
   } | null>(null);
 
   const scheduleQuery = useCustom({
-    url: "schedule",
+    url: "/schedule",
     method: "get",
     config: {
       query: dateRange

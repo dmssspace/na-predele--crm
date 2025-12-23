@@ -3,12 +3,13 @@
 import { PropsWithChildren, Suspense } from "react";
 
 import { useNotificationProvider, ThemedLayout } from "@refinedev/antd";
-import { Refine } from "@refinedev/core";
+import { Refine, useCustom } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider from "@refinedev/nextjs-router";
 import { I18nProvider } from "@refinedev/core";
 import { Header } from "@components/header";
 import { Title } from "@components/title";
+import { Badge } from "antd";
 
 import { ColorModeContextProvider } from "@contexts/color-mode";
 import { DevtoolsProvider } from "@providers/devtools";
@@ -32,6 +33,26 @@ import {
 
 type Props = {
   themeMode?: string;
+};
+
+const CallbackIcon = () => {
+  const {
+    query: { data },
+  } = useCustom({
+    url: "/callback/new/count",
+    method: "get",
+    queryOptions: {
+      refetchInterval: 30000,
+    },
+  });
+
+  const count = data?.data?.data || 0;
+
+  return (
+    <Badge count={count} size="small" showZero={false} style={{ lineHeight: 1 }}>
+      <PhoneOutlined style={{ fontSize: 16 }} />
+    </Badge>
+  );
 };
 
 export const RefineContext = ({

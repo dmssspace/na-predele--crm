@@ -3,6 +3,7 @@
 import { FileAddOutlined } from "@ant-design/icons";
 import {
   CreateButton,
+  DateField,
   DeleteButton,
   EditButton,
   ImageField,
@@ -11,7 +12,7 @@ import {
   useTable,
 } from "@refinedev/antd";
 import { type BaseRecord } from "@refinedev/core";
-import { Button, Space, Table } from "antd";
+import { Button, Space, Table, Tag } from "antd";
 
 export default function MediaList() {
   const { result, tableProps } = useTable({
@@ -31,7 +32,6 @@ export default function MediaList() {
       }}
     >
       <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="id" title={"ID"} />
         <Table.Column
           dataIndex="type"
           title={"Тип медиа"}
@@ -65,34 +65,44 @@ export default function MediaList() {
             }
 
             return "-";
-          }
-            
-            
-          }
+          }}
           title={"Предпросмотр"}
         />
         <Table.Column
           dataIndex="status"
           title={"Статус"}
           render={(value: string) => {
-            if (value === "pending") {
-              return "Обрабатывается";
+            let readableValue = "-";
+            let tagColor = "blue";
+
+            switch (value) {
+              case "pending":
+                readableValue = "Обрабатывается";
+                tagColor = "yellow";
+
+                break;
+              case "ready":
+                readableValue = "Загружен";
+                tagColor = "green";
+
+                break;
+              case "failed":
+                readableValue = "Ошибка обработки";
+                tagColor = "red";
+
+                break;
             }
 
-            if (value === "ready") {
-              return "Загружен";
-            }
-
-            if (value === "failed") {
-              return "Ошибка обработки";
-            }
-
-            return "-";
+            return <Tag color={tagColor}>{readableValue}</Tag>;
           }}
         />
-        <Table.Column dataIndex="user_id" title={"ID автора"} />
-        <Table.Column dataIndex="created_at" title={"Дата создания"} />
-        <Table.Column dataIndex="updated_at" title={"Дата обновления"} />
+        <Table.Column
+          dataIndex="created_at"
+          title={"Дата загрузки"}
+          render={(value: string) => {
+            return <DateField value={value} />;
+          }}
+        />
         <Table.Column
           title={"Действия"}
           dataIndex="actions"

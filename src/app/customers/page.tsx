@@ -34,7 +34,6 @@ export default function BlogPostList() {
       }}
     >
       <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="id" title={"ID"} />
         <Table.Column dataIndex="full_name" title={"ФИО"} />
         <Table.Column
           dataIndex={["user", "phone_number"]}

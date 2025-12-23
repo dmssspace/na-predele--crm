@@ -39,7 +39,7 @@ export default function QuickVisitPage() {
   const searchQuery_custom = useCustom<{
     data: CustomerSearchResult[];
   }>({
-    url: "customers/search",
+    url: "/customers/search",
     method: "get",
     config: {
       query: { q: searchQuery },
@@ -54,7 +54,7 @@ export default function QuickVisitPage() {
 
   // Get active tickets
   const ticketsQuery = useCustom<{ data: Ticket[] }>({
-    url: "tickets",
+    url: "/tickets",
     method: "get",
     config: {
       query: {

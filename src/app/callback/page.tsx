@@ -9,6 +9,7 @@ import {
   useList,
   useOne,
   useGetIdentity,
+  useCustom,
 } from "@refinedev/core";
 import {
   Button,
@@ -99,7 +100,7 @@ export default function CallbackRequestList() {
   const handleAssign = (id: string) => {
     assignCallback(
       {
-        url: `callback/${id}/assign`,
+        url: `/callback/${id}/assign`,
         method: "post",
         values: {},
         successNotification: {
@@ -132,7 +133,7 @@ export default function CallbackRequestList() {
 
     solveCallback(
       {
-        url: `callback/${selectedRequestId}/solve`,
+        url: `/callback/${selectedRequestId}/solve`,
         method: "post",
         values: {
           comment: comment !== "" ? comment : null,
@@ -161,17 +162,13 @@ export default function CallbackRequestList() {
   };
 
   const ExpandedRowCustomer = ({ callback }: { callback: Callback }) => {
-    const { query } = useList({
-      resource: "customers",
-      filters: [
-        {
-          field: "phone_number",
-          operator: "eq",
-          value: callback.user_phone_number,
+    const { query } = useCustom({
+      url: "/customers/search",
+      method: "get",
+      config: {
+        query: {
+          q: callback.user_phone_number || callback.user_email,
         },
-      ],
-      pagination: {
-        mode: "off",
       },
     });
 
@@ -471,7 +468,6 @@ export default function CallbackRequestList() {
           style: { cursor: "pointer" },
         })}
       >
-        <Table.Column dataIndex="id" title="ID" />
         <Table.Column
           dataIndex="type"
           title="Тип заявки"
@@ -503,7 +499,7 @@ export default function CallbackRequestList() {
             return <Tag color={tagColor}>{humanReadableType}</Tag>;
           }}
         />
-        <Table.Column dataIndex="user_full_name" title="ФИО клиента" />
+        <Table.Column dataIndex="user_full_name" title="Имя клиента" />
         <Table.Column
           dataIndex="user_phone_number"
           title="Телефон клиента"
