@@ -2,9 +2,9 @@
 
 import { Create, useForm } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
-import { Form, Input, Space, Typography, Button } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { Form, Input, Space, Typography } from "antd";
 import { useState, useEffect } from "react";
+import { MediaSelector } from "@components/media/MediaSelector";
 
 const { Text } = Typography;
 
@@ -132,45 +132,16 @@ export default function ShopProductCreate() {
             </Text>
           </Space>
         )}
-        <Form.Item label={"Прикрепленные изображения (ID)"}>
-          <Form.List name="attached_media">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <Space
-                    key={key}
-                    style={{ display: "flex", marginBottom: 8 }}
-                    align="baseline"
-                  >
-                    <Form.Item
-                      {...restField}
-                      name={[name]}
-                      rules={[
-                        { required: true, message: "Введите ID изображения" },
-                      ]}
-                      style={{ marginBottom: 0 }}
-                    >
-                      <Input
-                        placeholder="ID изображения"
-                        style={{ width: 400 }}
-                      />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Добавить изображение
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
+        <Form.Item 
+          label={"Изображения товара"} 
+          name="attached_media_ids"
+          tooltip="Выберите изображения товара из медиа-библиотеки"
+        >
+          <MediaSelector
+            multiple={true}
+            accept="image/*"
+            buttonText="Выбрать изображения товара"
+          />
         </Form.Item>
       </Form>
     </Create>

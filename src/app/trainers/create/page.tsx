@@ -6,6 +6,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select, DatePicker, Space, Button } from "antd";
 import dayjs from "dayjs";
 import { useMemo } from "react";
+import { MediaSelector } from "@components/media/MediaSelector";
 
 export default function BlogPostCreate() {
   const { formProps, saveButtonProps } = useForm({
@@ -31,8 +32,6 @@ export default function BlogPostCreate() {
       initialValues: {
         gender: "male",
         spec: "box",
-        avatar_media_id: "10dadc79-5963-4c35-baf9-cbdb19a14ff6",
-        intro_media_id: "b47a76bd-8461-46f6-a3c3-4c05da6186c4",
       },
       onFinish: async (values: any) => {
         // Note: форматируем дату в DD.MM.YYYY
@@ -227,10 +226,16 @@ export default function BlogPostCreate() {
           rules={[
             {
               required: true,
+              message: "Выберите изображение профиля",
             },
           ]}
+          tooltip="Выберите фото тренера для профиля"
         >
-          <Input disabled />
+          <MediaSelector
+            multiple={false}
+            accept="image/*"
+            buttonText="Выбрать фото профиля"
+          />
         </Form.Item>
         <Form.Item
           label={"Видео с представлением тренера"}
@@ -238,10 +243,16 @@ export default function BlogPostCreate() {
           rules={[
             {
               required: true,
+              message: "Выберите видео-представление",
             },
           ]}
+          tooltip="Выберите видео-представление тренера"
         >
-          <Input disabled />
+          <MediaSelector
+            multiple={false}
+            accept="video/*"
+            buttonText="Выбрать видео"
+          />
         </Form.Item>
       </Form>
     </Create>

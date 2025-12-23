@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircleOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  SearchOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Create, useForm } from "@refinedev/antd";
 import { useCustom, useInvalidate } from "@refinedev/core";
 import {
@@ -30,10 +34,11 @@ export default function QuickVisitPage() {
   const [form] = Form.useForm();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchResult | null>(null);
-  const [registrationMode, setRegistrationMode] = useState<"with_ticket" | "without_ticket">(
-    "with_ticket"
-  );
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<CustomerSearchResult | null>(null);
+  const [registrationMode, setRegistrationMode] = useState<
+    "with_ticket" | "without_ticket"
+  >("with_ticket");
 
   // Search customers
   const searchQuery_custom = useCustom<{
@@ -155,7 +160,9 @@ export default function QuickVisitPage() {
                     style={{
                       cursor: "pointer",
                       backgroundColor:
-                        selectedCustomer?.id === customer.id ? "#e6f7ff" : undefined,
+                        selectedCustomer?.id === customer.id
+                          ? "#e6f7ff"
+                          : undefined,
                     }}
                   >
                     <AntList.Item.Meta
@@ -183,7 +190,9 @@ export default function QuickVisitPage() {
               >
                 <Space direction="vertical">
                   <Radio value="with_ticket">С абонементом</Radio>
-                  <Radio value="without_ticket">Без абонемента (бесплатно)</Radio>
+                  <Radio value="without_ticket">
+                    Без абонемента (бесплатно)
+                  </Radio>
                 </Space>
               </Radio.Group>
             </div>
@@ -207,12 +216,15 @@ export default function QuickVisitPage() {
                       </Form.Item>
                       <Form.Item
                         name="ticket_id"
-                        rules={[{ required: true, message: "Выберите абонемент" }]}
+                        rules={[
+                          { required: true, message: "Выберите абонемент" },
+                        ]}
                       >
                         <Select size="large" placeholder="Выберите абонемент">
                           {activeTickets.map((ticket: Ticket) => (
                             <Select.Option key={ticket.id} value={ticket.id}>
-                              {ticket.plan_name} (осталось: {ticket.remaining_visits})
+                              {ticket.plan_name} (осталось:{" "}
+                              {ticket.remaining_visits})
                             </Select.Option>
                           ))}
                         </Select>

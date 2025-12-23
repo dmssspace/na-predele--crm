@@ -1,0 +1,56 @@
+.drawer {
+}
+
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.avatar {
+  background-color: #1890ff;
+}
+
+.headerTitle {
+  margin: 0;
+}
+
+.fieldCard {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.fieldHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.fieldLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fieldIcon {
+  color: #8c8c8c;
+}
+
+.formItemGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formItem {
+  margin: 0;
+}
+
+.fullWidthInput {
+  width: 100%;
+}

@@ -395,8 +395,18 @@ export default function TicketPlanList() {
           rowExpandable: () => true,
         }}
       >
-        <Table.Column dataIndex="id" title={"ID"} width={80} />
         <Table.Column dataIndex="name" title={"Название"} />
+        <Table.Column
+          dataIndex="description"
+          title={"Описание"}
+          render={(value: string) => {
+            if (!value || value === "") {
+              return "-";
+            }
+
+            return value;
+          }}
+        />
         <Table.Column
           dataIndex="type"
           title={"Тип"}

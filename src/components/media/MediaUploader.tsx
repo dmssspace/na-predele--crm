@@ -1,0 +1,311 @@
+"use client";
+
+import { useState } from "react";
+import { Upload, message, Modal, Button, Progress } from "antd";
+import { PlusOutlined, InboxOutlined } from "@ant-design/icons";
+import type { UploadFile, RcFile } from "antd/es/upload/interface";
+import axios from "axios";
+import { API_URL } from "@providers/constants";
+
+interface MediaFile {
+  id: string;
+  url: string;
+  filename: string;
+  mime_type: string;
+  size: number;
+}
+
+interface MediaUploaderProps {
+  /**
+   * Режим отображения: 
+   * - 'picture-card' - карточки для изображений
+   * - 'picture' - список с превью
+   * - 'dragger' - область перетаскивания
+   */
+  mode?: "picture-card" | "picture" | "dragger";
+  
+  /**
+   * Максимальное количество файлов
+   */
+  maxCount?: number;
+  
+  /**
+   * Разрешённые типы файлов (например: "image/*", "video/*", ".pdf")
+   */
+  accept?: string;
+  
+  /**
+   * Максимальный размер файла в МБ
+   */
+  maxSize?: number;
+  
+  /**
+   * Показывать превью для изображений
+   */
+  showPreview?: boolean;
+  
+  /**
+   * Callback при успешной загрузке
+   */
+  onUploadSuccess?: (files: MediaFile[]) => void;
+  
+  /**
+   * Начальные файлы (для редактирования)
+   */
+  defaultFiles?: MediaFile[];
+  
+  /**
+   * Текст кнопки/подсказки
+   */
+  uploadText?: string;
+  
+  /**
+   * Подсказка под кнопкой
+   */
+  uploadHint?: string;
+}
+
+export const MediaUploader: React.FC<MediaUploaderProps> = ({
+  mode = "picture-card",
+  maxCount = 1,
+  accept,
+  maxSize = 10,
+  showPreview = true,
+  onUploadSuccess,
+  defaultFiles = [],
+  uploadText = "Загрузить",
+  uploadHint,
+}) => {
+  const [fileList, setFileList] = useState<UploadFile[]>(
+    defaultFiles.map((file) => ({
+      uid: file.id,
+      name: file.filename,
+      status: "done",
+      url: file.url,
+    }))
+  );
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [uploadProgress, setUploadProgress] = useState<{
+    [key: string]: number;
+  }>({});
+
+  const beforeUpload = (file: RcFile) => {
+    // Проверка размера файла
+    const isLtMaxSize = file.size / 1024 / 1024 < maxSize;
+    if (!isLtMaxSize) {
+      message.error(`Файл должен быть меньше ${maxSize}МБ!`);
+      return Upload.LIST_IGNORE;
+    }
+
+    // Проверка типа файла
+    if (accept) {
+      const acceptTypes = accept.split(",").map((type) => type.trim());
+      const fileType = file.type;
+      const fileName = file.name;
+      
+      const isAccepted = acceptTypes.some((type) => {
+        if (type.startsWith(".")) {
+          return fileName.endsWith(type);
+        }
+        if (type.endsWith("/*")) {
+          const mainType = type.split("/")[0];
+          return fileType.startsWith(mainType);
+        }
+        return fileType === type;
+      });
+
+      if (!isAccepted) {
+        message.error(`Недопустимый тип файла. Разрешены: ${accept}`);
+        return Upload.LIST_IGNORE;
+      }
+    }
+
+    return true;
+  };
+
+  const handleUpload = async (options: any) => {
+    const { file, onSuccess, onError, onProgress } = options;
+    const formData = new FormData();
+    formData.append("files", file);
+
+    try {
+      setUploadProgress((prev) => ({ ...prev, [file.uid]: 0 }));
+
+      const response = await axios.post(`${API_URL}/media/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total || 1)
+          );
+          setUploadProgress((prev) => ({ ...prev, [file.uid]: percentCompleted }));
+          onProgress({ percent: percentCompleted });
+        },
+      });
+
+      const uploadedFile: MediaFile = response.data.data[0];
+      
+      message.success(`${file.name} успешно загружен`);
+      
+      setUploadProgress((prev) => {
+        const newProgress = { ...prev };
+        delete newProgress[file.uid];
+        return newProgress;
+      });
+
+      onSuccess(uploadedFile, file);
+      
+      // Callback с информацией о загруженных файлах
+      if (onUploadSuccess) {
+        const updatedFiles = [
+          ...fileList
+            .filter((f) => f.status === "done")
+            .map((f) => ({
+              id: f.uid,
+              url: f.url || "",
+              filename: f.name,
+              mime_type: "",
+              size: f.size || 0,
+            })),
+          uploadedFile,
+        ];
+        onUploadSuccess(updatedFiles);
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      message.error(`Ошибка загрузки ${file.name}: ${error.message}`);
+      
+      setUploadProgress((prev) => {
+        const newProgress = { ...prev };
+        delete newProgress[file.uid];
+        return newProgress;
+      });
+      
+      onError(error);
+    }
+  };
+
+  const handleChange = ({ fileList: newFileList }: any) => {
+    setFileList(newFileList);
+  };
+
+  const handlePreview = async (file: UploadFile) => {
+    if (!showPreview) return;
+
+    let preview = file.url || file.preview;
+    
+    if (!preview && file.originFileObj) {
+      preview = await getBase64(file.originFileObj as RcFile);
+    }
+
+    setPreviewImage(preview || "");
+    setPreviewOpen(true);
+  };
+
+  const handleRemove = (file: UploadFile) => {
+    const updatedFiles = fileList
+      .filter((f) => f.uid !== file.uid && f.status === "done")
+      .map((f) => ({
+        id: f.uid,
+        url: f.url || "",
+        filename: f.name,
+        mime_type: "",
+        size: f.size || 0,
+      }));
+    
+    if (onUploadSuccess) {
+      onUploadSuccess(updatedFiles);
+    }
+  };
+
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>{uploadText}</div>
+    </div>
+  );
+
+  // Для режима dragger
+  if (mode === "dragger") {
+    return (
+      <>
+        <Upload.Dragger
+          fileList={fileList}
+          customRequest={handleUpload}
+          onChange={handleChange}
+          onPreview={handlePreview}
+          onRemove={handleRemove}
+          beforeUpload={beforeUpload}
+          maxCount={maxCount}
+          accept={accept}
+          multiple={maxCount > 1}
+        >
+          <p className="ant-upload-drag-icon">
+            <InboxOutlined />
+          </p>
+          <p className="ant-upload-text">{uploadText}</p>
+          {uploadHint && <p className="ant-upload-hint">{uploadHint}</p>}
+        </Upload.Dragger>
+        <Modal
+          open={previewOpen}
+          title="Предпросмотр"
+          footer={null}
+          onCancel={() => setPreviewOpen(false)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt="preview" style={{ width: "100%" }} src={previewImage} />
+        </Modal>
+      </>
+    );
+  }
+
+  // Для режимов picture-card и picture
+  return (
+    <>
+      <Upload
+        listType={mode}
+        fileList={fileList}
+        customRequest={handleUpload}
+        onChange={handleChange}
+        onPreview={handlePreview}
+        onRemove={handleRemove}
+        beforeUpload={beforeUpload}
+        maxCount={maxCount}
+        accept={accept}
+        multiple={maxCount > 1}
+      >
+        {fileList.length >= maxCount ? null : mode === "picture-card" ? (
+          uploadButton
+        ) : (
+          <Button icon={<PlusOutlined />}>{uploadText}</Button>
+        )}
+      </Upload>
+      {uploadHint && (
+        <div style={{ marginTop: 8, color: "#999", fontSize: 12 }}>
+          {uploadHint}
+        </div>
+      )}
+      <Modal
+        open={previewOpen}
+        title="Предпросмотр"
+        footer={null}
+        onCancel={() => setPreviewOpen(false)}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img alt="preview" style={{ width: "100%" }} src={previewImage} />
+      </Modal>
+    </>
+  );
+};
+
+// Вспомогательная функция для preview
+const getBase64 = (file: RcFile): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });

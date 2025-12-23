@@ -1,24 +1,19 @@
-// Schedule Module Types
-
 export type TrainingType = "individual" | "group_adult" | "group_child";
-export type TrainingSpec = "box" | "thai" | "kickboxing" | "mma" | "women_martial_arts";
+
+export type TrainingSpec =
+  | "box"
+  | "thai"
+  | "kickboxing"
+  | "mma"
+  | "women_martial_arts";
+
 export type SessionStatus = "scheduled" | "canceled" | "completed";
+
 export type BookingStatus = "requested" | "confirmed" | "canceled";
+
 export type EventType = "recurring" | "once";
-export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Monday, 6 = Sunday
 
-export interface Trainer {
-  id: string;
-  full_name: string;
-  short_name: string;
-  spec: TrainingSpec;
-}
-
-export interface Customer {
-  id: string;
-  full_name: string;
-  short_name: string;
-}
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface Ticket {
   id: string;
@@ -38,7 +33,7 @@ export interface Event {
   training_spec: TrainingSpec;
   clients_cap: number;
   weekday?: Weekday;
-  start_time?: string; // HH:MM format for recurring
+  start_time?: string; // HH:MM
   end_time?: string;
   trainer: Trainer;
 }
@@ -158,7 +153,6 @@ export interface ApiResponse<T> {
   };
 }
 
-// UI Helper Types
 export interface SessionWithDetails extends Session {
   capacity_percentage: number;
   is_full: boolean;

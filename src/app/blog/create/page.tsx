@@ -3,20 +3,14 @@
 import { humanizeBlogCategoryTitle } from "@lib/format/humanize";
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
-import { Form, Input, Select, Upload, Button } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { Form, Input, Select } from "antd";
+import { MediaUploader } from "@components/media/MediaUploader";
+import { MediaSelector } from "@components/media/MediaSelector";
 
 export default function BlogPostCreate() {
   const { formProps, saveButtonProps } = useForm({});
   const form = formProps.form;
   const postType = Form.useWatch("type", form);
-
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e && e.fileList;
-  };
 
   const { selectProps: categorySelectProps } = useSelect({
     resource: "blog/categories",
@@ -101,32 +95,29 @@ export default function BlogPostCreate() {
 
         {postType === "gallery" && (
           <Form.Item
-            label={"Галерея"}
-            name={"gallery"}
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-            rules={[{ required: true }]}
+            label={"Галерея изображений"}
+            name={"gallery_media_ids"}
+            rules={[{ required: true, message: "Выберите хотя бы одно изображение" }]}
           >
-            <Upload listType="picture-card" multiple beforeUpload={() => false}>
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Загрузить</div>
-              </div>
-            </Upload>
+            <MediaSelector
+              multiple={true}
+              accept="image/*"
+              buttonText="Выбрать изображения для галереи"
+            />
           </Form.Item>
         )}
 
         {postType === "post" && (
           <Form.Item
-            label={"Изображение"}
-            name={"cover_image"}
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-            rules={[{ required: true }]}
+            label={"Обложка поста"}
+            name={"cover_media_id"}
+            rules={[{ required: true, message: "Выберите обложку для поста" }]}
           >
-            <Upload listType="picture" beforeUpload={() => false} maxCount={1}>
-              <Button>Загрузить изображение</Button>
-            </Upload>
+            <MediaSelector
+              multiple={false}
+              accept="image/*"
+              buttonText="Выбрать обложку"
+            />
           </Form.Item>
         )}
       </Form>

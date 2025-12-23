@@ -173,7 +173,7 @@ export default function CallbackRequestList() {
     });
 
     const { data: customerData, isLoading } = query;
-    const customer = customerData?.data?.[0];
+    const customer = customerData?.data?.data?.[0];
 
     if (isLoading) {
       return (
@@ -207,6 +207,24 @@ export default function CallbackRequestList() {
       );
     }
 
+    let formattedPhoneNumber = customer.user.phone_number.replace(/\D/g, "");
+    let displayNumber = formattedPhoneNumber;
+
+    if (
+      formattedPhoneNumber.length === 11 &&
+      formattedPhoneNumber.startsWith("7")
+    ) {
+      displayNumber = `+7 (${formattedPhoneNumber.slice(
+        1,
+        4
+      )}) ${formattedPhoneNumber.slice(4, 7)}-${formattedPhoneNumber.slice(
+        7,
+        9
+      )}-${formattedPhoneNumber.slice(9, 11)}`;
+    } else {
+      displayNumber = customer.user.phone_number;
+    }
+
     return (
       <Card
         size="small"
@@ -233,13 +251,39 @@ export default function CallbackRequestList() {
           <div>
             <Text type="secondary">Телефон</Text>
             <div>
-              <Text>{customer.phone_number || "-"}</Text>
+              <Space size="small">
+                <a href={`tel:+${formattedPhoneNumber}`}>{displayNumber}</a>
+                <Button
+                  type="text"
+                  size="small"
+                  title="Скопировать номер телефона"
+                  icon={<CopyOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(displayNumber);
+                  }}
+                />
+              </Space>
             </div>
           </div>
           <div>
             <Text type="secondary">Email</Text>
             <div>
-              <Text>{customer.email || "-"}</Text>
+              <Space size="small">
+                <a href={`mailto:${customer.user.email}`}>
+                  {customer.user.email || "-"}
+                </a>
+                <Button
+                  type="text"
+                  size="small"
+                  title="Скопировать эл. почту"
+                  icon={<CopyOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(customer.user.email);
+                  }}
+                />
+              </Space>
             </div>
           </div>
           <div>
@@ -343,9 +387,7 @@ export default function CallbackRequestList() {
                   <>
                     <Text type="secondary">Тариф абонемента</Text>
                     {record.metadata.ticket_plan_id ? (
-                      <TicketPlanInfo
-                        planID={record.metadata.ticket_plan_id}
-                      />
+                      <TicketPlanInfo planID={record.metadata.ticket_plan_id} />
                     ) : (
                       <Text>-</Text>
                     )}
