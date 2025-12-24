@@ -7,12 +7,9 @@ import {
   CloseCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import {
-  List,
-  useTable,
-} from "@refinedev/antd";
-import { useInvalidate } from "@refinedev/core";
-import { Button, DatePicker, Form, Select, Space, Table, Tag, message } from "antd";
+import { List, useTable } from "@refinedev/antd";
+import { useInvalidate, useNotification } from "@refinedev/core";
+import { Button, DatePicker, Form, Select, Space, Table, Tag } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useTranslations } from "next-intl";
@@ -24,6 +21,7 @@ const { RangePicker } = DatePicker;
 export default function BookingsPage() {
   const t = useTranslations("schedule.bookings");
   const invalidate = useInvalidate();
+  const { open } = useNotification();
   const [form] = Form.useForm();
 
   const { tableProps, searchFormProps, filters } = useTable<Booking>({
@@ -31,7 +29,7 @@ export default function BookingsPage() {
     syncWithLocation: true,
     onSearch: (values: any) => {
       const filters: any[] = [];
-      
+
       if (values.status) {
         filters.push({
           field: "status",
@@ -60,20 +58,32 @@ export default function BookingsPage() {
   const handleRegisterVisit = async (bookingId: string) => {
     try {
       await scheduleApi.registerVisitFromBooking(bookingId);
-      message.success(t("visitRegistered"));
+      open?.({
+        type: "success",
+        message: t("visitRegistered"),
+      });
       invalidate({ resource: "bookings", invalidates: ["list"] });
     } catch (error) {
-      message.error(t("visitError"));
+      open?.({
+        type: "error",
+        message: t("visitError"),
+      });
     }
   };
 
   const handleCancel = async (bookingId: string) => {
     try {
       await scheduleApi.cancelBooking(bookingId, { canceled_by: "user" });
-      message.success(t("cancelSuccess"));
+      open?.({
+        type: "success",
+        message: t("cancelSuccess"),
+      });
       invalidate({ resource: "bookings", invalidates: ["list"] });
     } catch (error) {
-      message.error(t("cancelError"));
+      open?.({
+        type: "error",
+        message: t("cancelError"),
+      });
     }
   };
 
@@ -86,7 +96,12 @@ export default function BookingsPage() {
         </Space>
       }
     >
-      <Form {...searchFormProps} form={form} layout="inline" style={{ marginBottom: 16 }}>
+      <Form
+        {...searchFormProps}
+        form={form}
+        layout="inline"
+        style={{ marginBottom: 16 }}
+      >
         <Form.Item name="status">
           <Select
             allowClear
@@ -130,7 +145,9 @@ export default function BookingsPage() {
           title={t("table.session")}
           render={(value, record: Booking) => (
             <div>
-              <div>{format(parseISO(value), "dd.MM.yyyy HH:mm", { locale: ru })}</div>
+              <div>
+                {format(parseISO(value), "dd.MM.yyyy HH:mm", { locale: ru })}
+              </div>
               <div style={{ fontSize: 12, color: "#888" }}>
                 {record.session_training_spec}
               </div>

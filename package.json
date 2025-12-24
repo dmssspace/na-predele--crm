@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=3072 refine dev --port 8080",
+    "dev": "cross-env refine dev --port 8080",
     "build": "refine build",
     "start": "refine start",
     "lint": "next lint",

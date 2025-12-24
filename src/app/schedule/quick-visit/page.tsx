@@ -7,7 +7,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Create, useForm } from "@refinedev/antd";
-import { useCustom, useInvalidate } from "@refinedev/core";
+import { useCustom, useInvalidate, useNotification } from "@refinedev/core";
 import {
   Alert,
   Button,
@@ -20,7 +20,6 @@ import {
   Select,
   Space,
   Typography,
-  message,
 } from "antd";
 import { useTranslations } from "next-intl";
 import { scheduleApi } from "@/lib/api/schedule";
@@ -31,6 +30,7 @@ const { Text, Title } = Typography;
 export default function QuickVisitPage() {
   const t = useTranslations("schedule.quickVisit");
   const invalidate = useInvalidate();
+  const { open } = useNotification();
   const [form] = Form.useForm();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,7 +79,10 @@ export default function QuickVisitPage() {
     resource: "visits",
     redirect: false,
     onMutationSuccess: () => {
-      message.success(t("success"));
+      open?.({
+        type: "success",
+        message: t("success"),
+      });
       form.resetFields();
       setSelectedCustomer(null);
       setSearchQuery("");
@@ -110,13 +113,19 @@ export default function QuickVisitPage() {
           customer_id: values.customer_id,
         });
       }
-      message.success("Посещение зарегистрировано");
+      open?.({
+        type: "success",
+        message: "Посещение зарегистрировано",
+      });
       form.resetFields();
       setSelectedCustomer(null);
       setSearchQuery("");
       invalidate({ resource: "visits", invalidates: ["list"] });
     } catch (error) {
-      message.error("Ошибка регистрации");
+      open?.({
+        type: "error",
+        message: "Ошибка регистрации",
+      });
     }
   };
 

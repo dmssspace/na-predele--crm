@@ -101,7 +101,7 @@ export default function BlogPostCreate() {
           >
             <MediaSelector
               multiple={true}
-              accept="image/*"
+              accept="image"
               buttonText="Выбрать изображения для галереи"
             />
           </Form.Item>
@@ -115,7 +115,7 @@ export default function BlogPostCreate() {
           >
             <MediaSelector
               multiple={false}
-              accept="image/*"
+              accept="image"
               buttonText="Выбрать обложку"
             />
           </Form.Item>

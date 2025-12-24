@@ -132,14 +132,14 @@ export default function ShopProductCreate() {
             </Text>
           </Space>
         )}
-        <Form.Item 
-          label={"Изображения товара"} 
+        <Form.Item
+          label={"Изображения товара"}
           name="attached_media_ids"
           tooltip="Выберите изображения товара из медиа-библиотеки"
         >
           <MediaSelector
             multiple={true}
-            accept="image/*"
+            accept="image"
             buttonText="Выбрать изображения товара"
           />
         </Form.Item>

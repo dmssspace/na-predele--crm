@@ -14,46 +14,15 @@ interface MediaFile {
 }
 
 interface CombinedMediaPickerProps {
-  /**
-   * Выбранные ID медиа файлов
-   */
   value?: string[];
-  
-  /**
-   * Callback при изменении выбора
-   */
   onChange?: (selectedIds: string[]) => void;
-  
-  /**
-   * Разрешить множественный выбор
-   */
   multiple?: boolean;
-  
-  /**
-   * Фильтр по типу файлов (например: "image/*", "video/*")
-   */
   accept?: string;
-  
-  /**
-   * Максимальный размер файла в МБ для загрузки
-   */
   maxSize?: number;
-  
-  /**
-   * Максимальное количество файлов для загрузки за раз
-   */
   maxUploadCount?: number;
-  
-  /**
-   * Режим отображения загрузчика
-   */
   uploaderMode?: "picture-card" | "picture" | "dragger";
 }
 
-/**
- * Комбинированный компонент для загрузки новых файлов или выбора существующих.
- * Объединяет функциональность MediaUploader и MediaSelector.
- */
 export const CombinedMediaPicker: React.FC<CombinedMediaPickerProps> = ({
   value = [],
   onChange,
@@ -64,17 +33,15 @@ export const CombinedMediaPicker: React.FC<CombinedMediaPickerProps> = ({
   uploaderMode = "picture-card",
 }) => {
   const handleUploadSuccess = (files: MediaFile[]) => {
-    const newIds = files.filter(f => f && f.id).map((f) => f.id);
-    
+    const newIds = files.filter((f) => f && f.id).map((f) => f.id);
+
     if (newIds.length === 0) {
-      return; // Нет валидных файлов для обработки
+      return;
     }
-    
+
     if (multiple) {
-      // Добавляем новые ID к существующим
       onChange?.([...value, ...newIds]);
     } else {
-      // Заменяем на новый ID
       onChange?.(newIds.slice(0, 1));
     }
   };
@@ -131,7 +98,5 @@ export const CombinedMediaPicker: React.FC<CombinedMediaPickerProps> = ({
     },
   ];
 
-  return (
-    <Tabs defaultActiveKey="select" items={items} />
-  );
+  return <Tabs defaultActiveKey="select" items={items} />;
 };

@@ -1,48 +1,43 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Modal, Button, Image, Input, Spin, Empty, Pagination, Space, Card, Tag } from "antd";
-import { PlusOutlined, SearchOutlined, FileImageOutlined, FileOutlined } from "@ant-design/icons";
+import {
+  Modal,
+  Button,
+  Image,
+  Input,
+  Spin,
+  Empty,
+  Pagination,
+  Space,
+  Card,
+  Tag,
+} from "antd";
+import {
+  PlusOutlined,
+  SearchOutlined,
+  FileImageOutlined,
+  FileOutlined,
+} from "@ant-design/icons";
 import { useList } from "@refinedev/core";
 
 interface MediaFile {
   id: string;
-  url: string;
-  filename: string;
-  mime_type: string;
-  size: number;
+  user_id: string;
+  type: string;
+  status: string;
+  public_url: string;
+  metadata: object;
   created_at: string;
+  updated_at: string;
 }
 
 interface MediaSelectorProps {
-  /**
-   * Выбранные ID медиа файлов
-   */
   value?: string[];
-  
-  /**
-   * Callback при изменении выбора
-   */
   onChange?: (selectedIds: string[]) => void;
-  
-  /**
-   * Разрешить множественный выбор
-   */
   multiple?: boolean;
-  
-  /**
-   * Фильтр по типу файлов (например: "image/*", "video/*")
-   */
   accept?: string;
-  
-  /**
-   * Текст кнопки
-   */
   buttonText?: string;
-  
-  /**
-   * Показывать превью выбранных файлов
-   */
   showPreview?: boolean;
 }
 
@@ -55,7 +50,7 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
   showPreview = true,
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>(value);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 12;
@@ -79,21 +74,18 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
 
   const { data, isLoading } = query;
   const mediaFiles = data?.data || [];
-  const total = data?.total || 0;
 
-  // Синхронизация с внешним значением (только если реально изменилось)
+  const total = data?.pagination?.total || 0;
+
   useEffect(() => {
-    const currentIds = JSON.stringify([...selectedIds].sort());
-    const newIds = JSON.stringify([...(value || [])].sort());
-    
-    if (currentIds !== newIds) {
-      setSelectedIds(value);
+    if (modalOpen) {
+      setSelectedIds(value || []);
     }
-  }, [value, selectedIds]);
+  }, [modalOpen]);
 
   const handleSelect = (id: string) => {
     let newSelected: string[];
-    
+
     if (multiple) {
       if (selectedIds.includes(id)) {
         newSelected = selectedIds.filter((selectedId) => selectedId !== id);
@@ -103,7 +95,7 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
     } else {
       newSelected = [id];
     }
-    
+
     setSelectedIds(newSelected);
   };
 
@@ -121,31 +113,19 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
 
   const filterByAccept = (file: MediaFile) => {
     if (!accept) return true;
-    
-    const acceptTypes = accept.split(",").map((type) => type.trim());
-    const fileType = file.mime_type || "";
-    const fileName = file.filename || "";
-    
-    return acceptTypes.some((type) => {
-      if (type.startsWith(".")) {
-        return fileName.endsWith(type);
-      }
-      if (type.endsWith("/*")) {
-        const mainType = type.split("/")[0];
-        return fileType.startsWith(mainType);
-      }
-      return fileType === type;
-    });
+
+    return file.type === accept;
   };
 
   const filteredFiles = mediaFiles.filter(filterByAccept);
 
-  // Получаем превью для выбранных файлов
   const getSelectedPreviews = () => {
     if (!showPreview || selectedIds.length === 0) return null;
-    
-    const selectedFiles = mediaFiles.filter((file) => selectedIds.includes(file.id));
-    
+
+    const selectedFiles = mediaFiles.filter((file) =>
+      selectedIds.includes(file.id)
+    );
+
     return (
       <Space wrap style={{ marginTop: 8 }}>
         {selectedFiles.map((file) => (
@@ -154,10 +134,10 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
             size="small"
             style={{ width: 100 }}
             cover={
-              file.mime_type.startsWith("image/") ? (
+              file.type === "image" ? (
                 <Image
-                  src={file.url}
-                  alt={file.filename}
+                  src={file.public_url}
+                  alt={"Изображение"}
                   height={80}
                   style={{ objectFit: "cover" }}
                   preview={false}
@@ -179,8 +159,14 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
           >
             <Card.Meta
               description={
-                <div style={{ fontSize: 11, overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {file.filename}
+                <div
+                  style={{
+                    fontSize: 11,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {file.id}
                 </div>
               }
             />
@@ -195,7 +181,7 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   };
 
   return (
@@ -261,17 +247,26 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
                     hoverable
                     onClick={() => handleSelect(file.id)}
                     style={{
-                      border: selected ? "2px solid #1890ff" : "1px solid #d9d9d9",
+                      border: selected
+                        ? "2px solid #1890ff"
+                        : "1px solid #d9d9d9",
                       cursor: "pointer",
                       position: "relative",
                     }}
                     cover={
-                      file.mime_type.startsWith("image/") ? (
-                        <div style={{ height: 120, overflow: "hidden" }}>
+                      file.type === "image" ? (
+                        <div
+                          style={{
+                            height: 120,
+                            width: "100%",
+                            overflow: "hidden",
+                          }}
+                        >
                           <Image
-                            src={file.url}
-                            alt={file.filename}
+                            src={file.public_url}
+                            alt={"Изображение"}
                             height={120}
+                            width={"100%"}
                             style={{ objectFit: "cover", width: "100%" }}
                             preview={false}
                           />
@@ -286,7 +281,9 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
                             background: "#f0f0f0",
                           }}
                         >
-                          <FileOutlined style={{ fontSize: 40, color: "#999" }} />
+                          <FileOutlined
+                            style={{ fontSize: 40, color: "#999" }}
+                          />
                         </div>
                       )
                     }
@@ -321,13 +318,13 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
                             }}
-                            title={file.filename}
+                            title={file.id}
                           >
-                            {file.filename}
+                            {file.id}
                           </div>
-                          <div style={{ color: "#999", marginTop: 4 }}>
+                          {/* <div style={{ color: "#999", marginTop: 4 }}>
                             {formatFileSize(file.size)}
-                          </div>
+                          </div> */}
                         </div>
                       }
                     />

@@ -16,53 +16,16 @@ interface MediaFile {
 }
 
 interface MediaUploaderProps {
-  /**
-   * Режим отображения: 
-   * - 'picture-card' - карточки для изображений
-   * - 'picture' - список с превью
-   * - 'dragger' - область перетаскивания
-   */
   mode?: "picture-card" | "picture" | "dragger";
-  
-  /**
-   * Максимальное количество файлов
-   */
   maxCount?: number;
-  
-  /**
-   * Разрешённые типы файлов (например: "image/*", "video/*", ".pdf")
-   */
   accept?: string;
-  
-  /**
-   * Максимальный размер файла в МБ
-   */
   maxSize?: number;
-  
-  /**
-   * Показывать превью для изображений
-   */
   showPreview?: boolean;
-  
-  /**
-   * Callback при успешной загрузке
-   */
   onUploadSuccess?: (files: MediaFile[]) => void;
-  
-  /**
-   * Начальные файлы (для редактирования)
-   */
   defaultFiles?: MediaFile[];
-  
-  /**
-   * Текст кнопки/подсказки
-   */
   uploadText?: string;
-  
-  /**
-   * Подсказка под кнопкой
-   */
   uploadHint?: string;
+  showUploadMessages?: boolean;
 }
 
 export const MediaUploader: React.FC<MediaUploaderProps> = ({
@@ -75,6 +38,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   defaultFiles = [],
   uploadText = "Загрузить",
   uploadHint,
+  showUploadMessages = true,
 }) => {
   const [fileList, setFileList] = useState<UploadFile[]>(
     defaultFiles.map((file) => ({
@@ -103,7 +67,6 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
       const acceptTypes = accept.split(",").map((type) => type.trim());
       const fileType = file.type;
       const fileName = file.name;
-      
       const isAccepted = acceptTypes.some((type) => {
         if (type.startsWith(".")) {
           return fileName.endsWith(type);
@@ -141,27 +104,35 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
           const percentCompleted = Math.round(
             (progressEvent.loaded * 100) / (progressEvent.total || 1)
           );
-          setUploadProgress((prev) => ({ ...prev, [file.uid]: percentCompleted }));
+          setUploadProgress((prev) => ({
+            ...prev,
+            [file.uid]: percentCompleted,
+          }));
           onProgress({ percent: percentCompleted });
         },
       });
 
       // Проверяем структуру ответа
       const uploadedMedia = response.data?.data?.uploaded_media;
-      
-      if (!uploadedMedia || !Array.isArray(uploadedMedia) || uploadedMedia.length === 0) {
+
+      if (
+        !uploadedMedia ||
+        !Array.isArray(uploadedMedia) ||
+        uploadedMedia.length === 0
+      ) {
         throw new Error("Некорректный ответ от сервера");
       }
 
       const uploadedFile: MediaFile = uploadedMedia[0];
-      
-      // Проверяем, что файл имеет необходимые поля
+
       if (!uploadedFile.id) {
         throw new Error("Загруженный файл не имеет ID");
       }
-      
-      message.success(`${file.name} успешно загружен`);
-      
+
+      if (showUploadMessages) {
+        message.success(`${file.name} успешно загружен`);
+      }
+
       setUploadProgress((prev) => {
         const newProgress = { ...prev };
         delete newProgress[file.uid];
@@ -169,7 +140,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
       });
 
       onSuccess(uploadedFile, file);
-      
+
       // Callback с информацией о загруженных файлах
       if (onUploadSuccess) {
         const updatedFiles = [
@@ -189,13 +160,13 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
     } catch (error: any) {
       console.error("Upload error:", error);
       message.error(`Ошибка загрузки ${file.name}: ${error.message}`);
-      
+
       setUploadProgress((prev) => {
         const newProgress = { ...prev };
         delete newProgress[file.uid];
         return newProgress;
       });
-      
+
       onError(error);
     }
   };
@@ -208,7 +179,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
     if (!showPreview) return;
 
     let preview = file.url || file.preview;
-    
+
     if (!preview && file.originFileObj) {
       preview = await getBase64(file.originFileObj as RcFile);
     }
@@ -227,7 +198,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
         mime_type: "",
         size: f.size || 0,
       }));
-    
+
     if (onUploadSuccess) {
       onUploadSuccess(updatedFiles);
     }

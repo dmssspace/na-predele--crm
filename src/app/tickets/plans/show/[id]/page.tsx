@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  DateField,
-  Show,
-  TextField,
-  BooleanField,
-} from "@refinedev/antd";
-import { useShow, useApiUrl } from "@refinedev/core";
-import { Typography, Tag, Card, Row, Col, Space, Descriptions, message } from "antd";
+import { DateField, Show, TextField, BooleanField } from "@refinedev/antd";
+import { useShow, useApiUrl, useNotification } from "@refinedev/core";
+import { Typography, Tag, Card, Row, Col, Space, Descriptions } from "antd";
 import { useEffect, useState } from "react";
 
 const { Title } = Typography;
@@ -29,6 +24,7 @@ export default function TicketPlanShow() {
   });
   const { isLoading } = query;
   const apiUrl = useApiUrl();
+  const { open } = useNotification();
   const [packages, setPackages] = useState<TicketPlanPackage[]>([]);
 
   useEffect(() => {
@@ -44,13 +40,16 @@ export default function TicketPlanShow() {
           const data = await response.json();
           setPackages(data.data || []);
         } catch (error) {
-          message.error("Не удалось загрузить пакеты");
+          open?.({
+            type: "error",
+            message: "Не удалось загрузить пакеты",
+          });
         }
       }
     };
 
     fetchPackages();
-  }, [record?.id, apiUrl]);
+  }, [record?.id, apiUrl, open]);
 
   const humanizeType = (type: string): string => {
     switch (type) {

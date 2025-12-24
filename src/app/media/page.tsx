@@ -11,26 +11,66 @@ import {
   ShowButton,
   useTable,
 } from "@refinedev/antd";
-import { type BaseRecord } from "@refinedev/core";
-import { Button, Space, Table, Tag } from "antd";
+import {
+  type BaseRecord,
+  useInvalidate,
+  useNotification,
+} from "@refinedev/core";
+import { Button, Space, Table, Tag, Modal } from "antd";
+import { useState } from "react";
+import { MediaUploader } from "@components/media";
 
 export default function MediaList() {
-  const { result, tableProps } = useTable({
+  const [uploaderOpen, setUploaderOpen] = useState(false);
+  const invalidate = useInvalidate();
+  const { open } = useNotification();
+  const { tableProps } = useTable({
     syncWithLocation: true,
   });
 
   return (
     <List
-      headerButtons={({ createButtonProps }) => {
-        if (createButtonProps) {
-          return (
-            <CreateButton {...createButtonProps} icon={<FileAddOutlined />}>
-              {"Загрузить файл"}
-            </CreateButton>
-          );
-        }
-      }}
+      headerButtons={() => (
+        <Button
+          type="primary"
+          icon={<FileAddOutlined />}
+          onClick={() => setUploaderOpen(true)}
+        >
+          Загрузить файл
+        </Button>
+      )}
     >
+      <Modal
+        title="Загрузить медиа файлы"
+        open={uploaderOpen}
+        onCancel={() => setUploaderOpen(false)}
+        footer={null}
+        width={700}
+        destroyOnHidden
+      >
+        <MediaUploader
+          key={uploaderOpen ? "open" : "closed"}
+          mode="dragger"
+          maxCount={10}
+          accept="image/*,video/*,.pdf"
+          maxSize={50}
+          uploadText="Нажмите или перетащите файлы сюда"
+          uploadHint="Поддерживаются изображения, видео и PDF до 50МБ"
+          showUploadMessages={false}
+          onUploadSuccess={(files) => {
+            setUploaderOpen(false);
+            open?.({
+              type: "success",
+              message: "Успешно загружено",
+              description: `Загружено файлов: ${files.length}`,
+            });
+            invalidate({
+              resource: "media",
+              invalidates: ["list"],
+            });
+          }}
+        />
+      </Modal>
       <Table {...tableProps} rowKey="id">
         <Table.Column
           dataIndex="type"

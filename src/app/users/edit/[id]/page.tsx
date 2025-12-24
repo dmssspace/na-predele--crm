@@ -60,7 +60,7 @@ export default function UserEdit() {
         >
           <MediaSelector
             multiple={false}
-            accept="image/*"
+            accept="image"
             buttonText="Выбрать аватар"
           />
         </Form.Item>

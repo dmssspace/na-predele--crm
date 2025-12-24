@@ -10,7 +10,7 @@ import {
   ShowButton,
   useTable,
 } from "@refinedev/antd";
-import { type BaseRecord, useApiUrl } from "@refinedev/core";
+import { type BaseRecord, useApiUrl, useNotification } from "@refinedev/core";
 import {
   Space,
   Table,
@@ -18,7 +18,6 @@ import {
   Typography,
   Button,
   InputNumber,
-  message,
   Card,
   Row,
   Col,
@@ -45,6 +44,7 @@ export default function TicketPlanList() {
   });
 
   const apiUrl = useApiUrl();
+  const { open } = useNotification();
   const [expandedPackages, setExpandedPackages] = useState<
     Record<string, TicketPlanPackage[]>
   >({});
@@ -66,7 +66,10 @@ export default function TicketPlanList() {
       const data = await response.json();
       setExpandedPackages((prev) => ({ ...prev, [planId]: data.data || [] }));
     } catch (error) {
-      message.error("Не удалось загрузить пакеты");
+      open?.({
+        type: "error",
+        message: "Не удалось загрузить пакеты",
+      });
     }
   };
 
@@ -94,7 +97,10 @@ export default function TicketPlanList() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      message.success("Цена успешно обновлена");
+      open?.({
+        type: "success",
+        message: "Цена успешно обновлена",
+      });
 
       await fetchPackages(ticketId);
 
@@ -105,7 +111,10 @@ export default function TicketPlanList() {
       });
     } catch (error) {
       console.error("Error updating price:", error);
-      message.error("Ошибка при обновлении цены");
+      open?.({
+        type: "error",
+        message: "Ошибка при обновлении цены",
+      });
     } finally {
       setIsUpdating((prev) => ({ ...prev, [packageId]: false }));
     }
@@ -135,7 +144,10 @@ export default function TicketPlanList() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      message.success("Количество занятий успешно обновлено");
+      open?.({
+        type: "success",
+        message: "Количество занятий успешно обновлено",
+      });
 
       await fetchPackages(ticketId);
 
@@ -146,7 +158,10 @@ export default function TicketPlanList() {
       });
     } catch (error) {
       console.error("Error updating sessions:", error);
-      message.error("Ошибка при обновлении количества занятий");
+      open?.({
+        type: "error",
+        message: "Ошибка при обновлении количества занятий",
+      });
     } finally {
       setIsUpdating((prev) => ({ ...prev, [`sessions_${packageId}`]: false }));
     }
