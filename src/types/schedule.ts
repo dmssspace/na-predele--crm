@@ -26,6 +26,152 @@ export interface Ticket {
   status: string;
 }
 
+// Trainer из бэкенда (Go структура trainers.TrainerProfile)
+export interface Trainer {
+  id: string;
+  user_id: string;
+  full_name: string;
+  short_name: string;
+  spec: string;
+  training_exp_start_on: string;
+  birth_date: string;
+  gender: string;
+  regalia?: string[];
+  approach?: string;
+  intro_url?: string;
+  avatar_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// ScheduleEvent из Go
+export interface ScheduleEvent {
+  id: string;
+  type: EventType; // "recurring" | "once"
+  training_type: TrainingType;
+  training_spec: TrainingSpec;
+  clients_cap: number;
+  start_at?: string; // ISO 8601 для "once" событий
+  end_at?: string; // ISO 8601 для "once" событий
+  weekday?: Weekday; // 0-6 для "recurring" событий
+  start_time?: string; // ISO 8601 время для "recurring"
+  end_time?: string; // ISO 8601 время для "recurring"
+  created_at?: string;
+  updated_at?: string;
+  trainer?: Trainer;
+}
+
+// ScheduleSession из Go
+export interface ScheduleSession {
+  id: string;
+  start_at: string; // ISO 8601
+  end_at: string; // ISO 8601
+  status: SessionStatus;
+  created_at?: string;
+  updated_at?: string;
+  event?: ScheduleEvent;
+}
+
+// Schedule из Go (один день в расписании)
+export interface Schedule {
+  date: string; // ISO 8601 date
+  weekday: Weekday;
+  sessions: ScheduleSession[];
+}
+
+// API Response wrapper
+export interface ApiScheduleResponse {
+  status: string;
+  data: Schedule[];
+}
+
+// ScheduleResponse - для совместимости
+export type ScheduleResponse = ApiScheduleResponse;
+
+// Visit из Go
+export interface Visit {
+  id: string;
+  customer_id?: string;
+  ticket_id?: string | null;
+  is_charged: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+// API Response для визитов
+export interface ApiVisitsResponse {
+  status: string;
+  data: Visit[];
+}
+
+// Ticket (абонемент)
+export interface TicketPlan {
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  visits_count: number;
+  validity_days: number;
+}
+
+export interface CustomerTicket {
+  id: string;
+  customer_id: string;
+  plan_id: string;
+  start_date: string;
+  end_date: string;
+  remaining_visits: number;
+  status: string; // "active" | "expired" | "used"
+  created_at: string;
+  updated_at?: string;
+  plan?: TicketPlan;
+}
+
+// API Response для абонементов
+export interface ApiTicketsResponse {
+  status: string;
+  data: CustomerTicket[];
+}
+
+// Customer search
+export interface CustomerSearchResult {
+  id: string;
+  full_name: string;
+  short_name: string;
+  phone_number?: string;
+  user?: {
+    email: string;
+    phone_number?: string;
+  };
+}
+
+export interface ApiCustomerSearchResponse {
+  status: string;
+  data: CustomerSearchResult[];
+}
+
+// Create visit request
+export interface CreateVisitRequest {
+  customer_id: string;
+  ticket_id?: string;
+  is_charged: boolean;
+}
+
+// Generic API Response
+export interface ApiResponse<T = any> {
+  status?: string;
+  success?: boolean;
+  message?: string;
+  data?: T;
+  error?:
+    | string
+    | {
+        code: string;
+        message: string;
+      };
+}
+
+// Legacy interfaces для обратной совместимости
 export interface Event {
   id: string;
   event_type: EventType;
@@ -33,7 +179,7 @@ export interface Event {
   training_spec: TrainingSpec;
   clients_cap: number;
   weekday?: Weekday;
-  start_time?: string; // HH:MM
+  start_time?: string;
   end_time?: string;
   trainer: Trainer;
 }
@@ -72,11 +218,6 @@ export interface ScheduleDay {
   date: string;
   weekday: Weekday;
   sessions: Session[];
-}
-
-export interface ScheduleResponse {
-  success: boolean;
-  data: ScheduleDay[];
 }
 
 export interface BookSessionRequest {
@@ -144,13 +285,10 @@ export interface Availability {
   end_time: string;
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-  };
+export interface UpdateWeekdayAvailabilityRequest {
+  weekday: Weekday;
+  start_time: string;
+  end_time: string;
 }
 
 export interface SessionWithDetails extends Session {

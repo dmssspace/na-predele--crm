@@ -82,6 +82,15 @@ export const RefineContext = ({
             authProvider={authProviderClient}
             resources={[
               {
+                name: "dashboard",
+                list: "/dashboard",
+                meta: {
+                  canDelete: false,
+                  label: "Главная",
+                  icon: <SettingOutlined />,
+                },
+              },
+              {
                 name: "callback",
                 identifier: "callback-requests",
                 list: "/callback",
@@ -262,6 +271,13 @@ export const RefineContext = ({
                 },
               },
               {
+                name: "administration",
+                meta: {
+                  label: "Администрирование",
+                  icon: <SettingOutlined />,
+                },
+              },
+              {
                 name: "media",
                 list: "/media",
                 create: "/media/upload",
@@ -271,6 +287,17 @@ export const RefineContext = ({
                   canDelete: true,
                   label: "Медиа",
                   icon: <FileImageOutlined />,
+                  parent: "administration",
+                },
+              },
+              {
+                name: "schedule/availability",
+                list: "/schedule/availability",
+                meta: {
+                  canDelete: false,
+                  label: "Расписание зала",
+                  icon: <ClockCircleOutlined />,
+                  parent: "administration",
                 },
               },
             ]}

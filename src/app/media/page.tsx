@@ -1,15 +1,14 @@
 "use client";
 
-import { FileAddOutlined } from "@ant-design/icons";
+import { FileAddOutlined, EyeOutlined } from "@ant-design/icons";
 import {
-  CreateButton,
   DateField,
   DeleteButton,
   EditButton,
   ImageField,
   List,
-  ShowButton,
   useTable,
+  useDrawerForm,
 } from "@refinedev/antd";
 import {
   type BaseRecord,
@@ -19,6 +18,7 @@ import {
 import { Button, Space, Table, Tag, Modal } from "antd";
 import { useState } from "react";
 import { MediaUploader } from "@components/media";
+import { MediaEditDrawer } from "@/components/media-drawer";
 
 export default function MediaList() {
   const [uploaderOpen, setUploaderOpen] = useState(false);
@@ -26,6 +26,18 @@ export default function MediaList() {
   const { open } = useNotification();
   const { tableProps } = useTable({
     syncWithLocation: true,
+  });
+
+  const {
+    drawerProps: editDrawerProps,
+    formProps: editFormProps,
+    show: editShow,
+    id: editId,
+    query: editQuery,
+  } = useDrawerForm({
+    action: "edit",
+    resource: "media",
+    redirect: false,
   });
 
   return (
@@ -71,7 +83,14 @@ export default function MediaList() {
           }}
         />
       </Modal>
-      <Table {...tableProps} rowKey="id">
+      <Table
+        {...tableProps}
+        rowKey="id"
+        onRow={(record) => ({
+          onClick: () => editShow(record.id),
+          style: { cursor: "pointer" },
+        })}
+      >
         <Table.Column
           dataIndex="type"
           title={"Тип медиа"}
@@ -95,12 +114,14 @@ export default function MediaList() {
           render={(_, record) => {
             if (record.type === "image") {
               return (
-                <ImageField
-                  value={record.public_url}
-                  width={120}
-                  height={120}
-                  style={{ objectFit: "cover" }}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ImageField
+                    value={record.public_url}
+                    width={120}
+                    height={120}
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
               );
             }
 
@@ -147,14 +168,27 @@ export default function MediaList() {
           title={"Действия"}
           dataIndex="actions"
           render={(_, record: BaseRecord) => (
-            <Space>
-              <EditButton hideText size="small" recordItemId={record.id} />
-              <ShowButton hideText size="small" recordItemId={record.id} />
+            <Space onClick={(e) => e.stopPropagation()}>
+              <EditButton
+                hideText
+                size="small"
+                recordItemId={record.id}
+                onClick={() => {
+                  editShow(record.id);
+                }}
+              />
               <DeleteButton hideText size="small" recordItemId={record.id} />
             </Space>
           )}
         />
       </Table>
+
+      <MediaEditDrawer
+        drawerProps={editDrawerProps}
+        formProps={editFormProps}
+        editQuery={editQuery}
+        id={editId}
+      />
     </List>
   );
 }

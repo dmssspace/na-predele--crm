@@ -5,7 +5,6 @@ import {
   Modal,
   Button,
   Image,
-  Input,
   Spin,
   Empty,
   Pagination,
@@ -15,7 +14,6 @@ import {
 } from "antd";
 import {
   PlusOutlined,
-  SearchOutlined,
   FileImageOutlined,
   FileOutlined,
 } from "@ant-design/icons";
@@ -51,37 +49,37 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 12;
 
   const { query } = useList<MediaFile>({
     resource: "media",
     pagination: {
-      currentPage,
+      currentPage: currentPage,
       pageSize,
     },
-    filters: searchText
-      ? [
-          {
-            field: "filename",
-            operator: "contains",
-            value: searchText,
-          },
-        ]
-      : [],
   });
 
-  const { data, isLoading } = query;
+  const { data, isLoading, refetch } = query;
   const mediaFiles = data?.data || [];
-
-  const total = data?.pagination?.total || 0;
+  const total = data?.total || 0;
 
   useEffect(() => {
     if (modalOpen) {
       setSelectedIds(value || []);
+      refetch();
     }
-  }, [modalOpen]);
+  }, [modalOpen, refetch, value]);
+
+  useEffect(() => {
+    if (modalOpen) {
+      refetch();
+    }
+  }, [currentPage, modalOpen, refetch]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleSelect = (id: string) => {
     let newSelected: string[];
@@ -207,19 +205,6 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
         okText="Подтвердить"
         cancelText="Отмена"
       >
-        <div style={{ marginBottom: 16 }}>
-          <Input
-            placeholder="Поиск по названию файла..."
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => {
-              setSearchText(e.target.value);
-              setCurrentPage(1);
-            }}
-            allowClear
-          />
-        </div>
-
         {isLoading ? (
           <div style={{ textAlign: "center", padding: 40 }}>
             <Spin size="large" />
@@ -338,7 +323,7 @@ export const MediaSelector: React.FC<MediaSelectorProps> = ({
                 current={currentPage}
                 pageSize={pageSize}
                 total={total}
-                onChange={setCurrentPage}
+                onChange={handlePageChange}
                 showSizeChanger={false}
               />
             </div>

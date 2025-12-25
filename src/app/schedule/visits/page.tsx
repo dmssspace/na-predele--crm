@@ -1,46 +1,116 @@
 "use client";
 
-import React from "react";
-import { CheckCircleOutlined, HistoryOutlined, UserOutlined } from "@ant-design/icons";
-import { List, useTable } from "@refinedev/antd";
-import { DatePicker, Form, Space, Table, Tag, Card, Statistic, Row, Col } from "antd";
+import React, { useState } from "react";
+import {
+  HistoryOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
+import { List } from "@refinedev/antd";
+import { Card, Space, Table, Tag, Statistic, Row, Col, Alert } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useTranslations } from "next-intl";
 import type { Visit } from "@/types/schedule";
-
-const { RangePicker } = DatePicker;
+import { visitsApi } from "@/lib/api/schedule";
+import { useQuery } from "@tanstack/react-query";
+import type { TablePaginationConfig } from "antd";
 
 export default function VisitsPage() {
   const t = useTranslations("schedule.visits");
-  const [form] = Form.useForm();
-
-  const { tableProps, searchFormProps } = useTable<Visit>({
-    resource: "visits",
-    syncWithLocation: true,
-    onSearch: (values: any) => {
-      const filters: any[] = [];
-
-      if (values.dateRange) {
-        filters.push({
-          field: "from",
-          operator: "eq" as const,
-          value: values.dateRange[0].toISOString(),
-        });
-        filters.push({
-          field: "to",
-          operator: "eq" as const,
-          value: values.dateRange[1].toISOString(),
-        });
-      }
-
-      return filters;
-    },
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 20,
   });
 
-  const visits = ((tableProps?.dataSource as any) || []) as Visit[];
+  // Fetch visits data
+  const {
+    data: visitsResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["visits", pagination.current, pagination.pageSize],
+    queryFn: () => visitsApi.getVisits(pagination.current, pagination.pageSize),
+  });
+
+  const visits = visitsResponse?.data || [];
   const totalVisits = visits.length;
   const totalCharged = visits.filter((v) => v.is_charged).length;
+  const totalFree = totalVisits - totalCharged;
+
+  const handleTableChange = (newPagination: TablePaginationConfig) => {
+    setPagination({
+      current: newPagination.current || 1,
+      pageSize: newPagination.pageSize || 20,
+    });
+  };
+
+  const columns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: 100,
+      render: (id: string) => (
+        <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
+          {id.substring(0, 8)}...
+        </span>
+      ),
+    },
+    {
+      title: "Клиент",
+      dataIndex: "customer_id",
+      key: "customer_id",
+      render: (customerId: string | undefined) => (
+        <Space>
+          {customerId ? (
+            <span>{customerId.substring(0, 8)}...</span>
+          ) : (
+            <Tag color="default">Не указан</Tag>
+          )}
+        </Space>
+      ),
+    },
+    {
+      title: "Абонемент",
+      dataIndex: "ticket_id",
+      key: "ticket_id",
+      render: (ticketId: string | null | undefined) =>
+        ticketId ? (
+          <Tag color="blue">🎫 {ticketId.substring(0, 8)}...</Tag>
+        ) : (
+          <Tag color="default">Разовое</Tag>
+        ),
+    },
+    {
+      title: "Тип оплаты",
+      dataIndex: "is_charged",
+      key: "is_charged",
+      render: (isCharged: boolean) =>
+        isCharged ? (
+          <Tag color="success" icon={<CheckCircleOutlined />}>
+            Оплачено
+          </Tag>
+        ) : (
+          <Tag color="processing" icon={<CloseCircleOutlined />}>
+            Бесплатно
+          </Tag>
+        ),
+    },
+    {
+      title: "Дата посещения",
+      dataIndex: "created_at",
+      key: "created_at",
+      sorter: (a: Visit, b: Visit) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      defaultSortOrder: "descend" as const,
+      render: (createdAt: string) => (
+        <span>
+          {format(parseISO(createdAt), "dd MMMM yyyy, HH:mm", { locale: ru })}
+        </span>
+      ),
+    },
+  ];
 
   return (
     <List
@@ -51,22 +121,33 @@ export default function VisitsPage() {
         </Space>
       }
     >
-      <Form {...searchFormProps} form={form} layout="inline" style={{ marginBottom: 16 }}>
-        <Form.Item name="dateRange">
-          <RangePicker
-            placeholder={[t("filters.dateFrom"), t("filters.dateTo")]}
-            format="DD.MM.YYYY"
-          />
-        </Form.Item>
-      </Form>
+      {error && (
+        <Alert
+          message="Ошибка загрузки"
+          description="Не удалось загрузить историю визитов. Проверьте подключение к серверу."
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+      )}
 
       {totalVisits > 0 && (
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={8}>
             <Card>
               <Statistic
-                title={t("summary.total")}
+                title="Всего посещений"
                 value={totalVisits}
+                prefix={<HistoryOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card>
+              <Statistic
+                title="Оплаченные"
+                value={totalCharged}
+                valueStyle={{ color: "#52c41a" }}
                 prefix={<CheckCircleOutlined />}
               />
             </Card>
@@ -74,74 +155,32 @@ export default function VisitsPage() {
           <Col span={8}>
             <Card>
               <Statistic
-                title={t("summary.charged")}
-                value={totalCharged}
-                prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card>
-              <Statistic
-                title={t("summary.free")}
-                value={totalVisits - totalCharged}
-                prefix={<CheckCircleOutlined style={{ color: "#1890ff" }} />}
+                title="Бесплатные"
+                value={totalFree}
+                valueStyle={{ color: "#1890ff" }}
+                prefix={<CloseCircleOutlined />}
               />
             </Card>
           </Col>
         </Row>
       )}
 
-      <Table {...tableProps} rowKey="id">
-        <Table.Column
-          dataIndex="customer_name"
-          title={t("table.customer")}
-          render={(value) => (
-            <Space>
-              <UserOutlined />
-              {value}
-            </Space>
-          )}
+      <Card>
+        <Table
+          columns={columns}
+          dataSource={visits}
+          rowKey="id"
+          loading={isLoading}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            showSizeChanger: true,
+            showTotal: (total) => `Всего: ${total} записей`,
+            pageSizeOptions: ["10", "20", "50", "100"],
+          }}
+          onChange={handleTableChange}
         />
-
-        <Table.Column
-          dataIndex="session_date"
-          title={t("table.session")}
-          render={(value, record: Visit) => (
-            <div>
-              <div>{format(parseISO(value), "dd.MM.yyyy HH:mm", { locale: ru })}</div>
-              <div style={{ fontSize: 12, color: "#888" }}>
-                {record.session_training_spec}
-              </div>
-            </div>
-          )}
-        />
-
-        <Table.Column
-          dataIndex="session_trainer_name"
-          title={t("table.trainer")}
-        />
-
-        <Table.Column
-          dataIndex="visited_at"
-          title={t("table.visitedAt")}
-          render={(value) => format(parseISO(value), "dd.MM.yyyy HH:mm", { locale: ru })}
-        />
-
-        <Table.Column
-          dataIndex="is_charged"
-          title={t("table.charged")}
-          render={(value) =>
-            value ? (
-              <Tag icon={<CheckCircleOutlined />} color="success">
-                Списано
-              </Tag>
-            ) : (
-              <Tag color="default">Бесплатно</Tag>
-            )
-          }
-        />
-      </Table>
+      </Card>
     </List>
   );
 }

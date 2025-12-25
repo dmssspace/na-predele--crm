@@ -169,7 +169,11 @@
       "quick-visit": "Visit Registration",
       "bookings": "Bookings List",
       "events": "Schedule Events",
-      "visits": "Visit History"
+      "visits": "Visit History",
+      "availability": "Gym Schedule"
+    },
+    "availability": {
+      "title": "Gym Schedule"
     },
     "calendar": {
       "week": "Week",

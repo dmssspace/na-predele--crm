@@ -6,14 +6,7 @@ import { PlusOutlined, InboxOutlined } from "@ant-design/icons";
 import type { UploadFile, RcFile } from "antd/es/upload/interface";
 import axios from "axios";
 import { API_URL } from "@providers/constants";
-
-interface MediaFile {
-  id: string;
-  url: string;
-  filename: string;
-  mime_type: string;
-  size: number;
-}
+import type { MediaFile } from "@/types/media";
 
 interface MediaUploaderProps {
   mode?: "picture-card" | "picture" | "dragger";
@@ -40,6 +33,9 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   uploadHint,
   showUploadMessages = true,
 }) => {
+  // Нормализуем accept для корректной работы с HTML input
+  const normalizedAccept = accept === "image" ? "image/*" : accept;
+
   const [fileList, setFileList] = useState<UploadFile[]>(
     defaultFiles.map((file) => ({
       uid: file.id,
@@ -55,11 +51,13 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   }>({});
 
   const beforeUpload = (file: RcFile) => {
+    console.log("beforeUpload called:", file.name, file.type, file.size);
+
     // Проверка размера файла
     const isLtMaxSize = file.size / 1024 / 1024 < maxSize;
     if (!isLtMaxSize) {
       message.error(`Файл должен быть меньше ${maxSize}МБ!`);
-      return Upload.LIST_IGNORE;
+      return false;
     }
 
     // Проверка типа файла
@@ -67,9 +65,15 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
       const acceptTypes = accept.split(",").map((type) => type.trim());
       const fileType = file.type;
       const fileName = file.name;
+      
+      console.log("Checking file type:", { accept, acceptTypes, fileType, fileName });
+      
       const isAccepted = acceptTypes.some((type) => {
         if (type.startsWith(".")) {
           return fileName.endsWith(type);
+        }
+        if (type === "image" || type === "image/*") {
+          return fileType.startsWith("image/");
         }
         if (type.endsWith("/*")) {
           const mainType = type.split("/")[0];
@@ -80,10 +84,11 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
 
       if (!isAccepted) {
         message.error(`Недопустимый тип файла. Разрешены: ${accept}`);
-        return Upload.LIST_IGNORE;
+        return false;
       }
     }
 
+    console.log("beforeUpload returning true");
     return true;
   };
 
@@ -139,23 +144,25 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
         return newProgress;
       });
 
+      // Обновляем fileList с правильными данными
+      setFileList((prevList) =>
+        prevList.map((f) =>
+          f.uid === file.uid
+            ? {
+                ...f,
+                status: "done" as const,
+                url: uploadedFile.url,
+                uid: uploadedFile.id,
+              }
+            : f
+        )
+      );
+
       onSuccess(uploadedFile, file);
 
       // Callback с информацией о загруженных файлах
       if (onUploadSuccess) {
-        const updatedFiles = [
-          ...fileList
-            .filter((f) => f.status === "done")
-            .map((f) => ({
-              id: f.uid,
-              url: f.url || "",
-              filename: f.name,
-              mime_type: "",
-              size: f.size || 0,
-            })),
-          uploadedFile,
-        ];
-        onUploadSuccess(updatedFiles);
+        onUploadSuccess([uploadedFile]);
       }
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -189,19 +196,8 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   };
 
   const handleRemove = (file: UploadFile) => {
-    const updatedFiles = fileList
-      .filter((f) => f.uid !== file.uid && f.status === "done")
-      .map((f) => ({
-        id: f.uid,
-        url: f.url || "",
-        filename: f.name,
-        mime_type: "",
-        size: f.size || 0,
-      }));
-
-    if (onUploadSuccess) {
-      onUploadSuccess(updatedFiles);
-    }
+    // Удаление файла из списка
+    return true;
   };
 
   const uploadButton = (
@@ -223,7 +219,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
           onRemove={handleRemove}
           beforeUpload={beforeUpload}
           maxCount={maxCount}
-          accept={accept}
+          accept={normalizedAccept}
           multiple={maxCount > 1}
         >
           <p className="ant-upload-drag-icon">
@@ -257,7 +253,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
         onRemove={handleRemove}
         beforeUpload={beforeUpload}
         maxCount={maxCount}
-        accept={accept}
+        accept={normalizedAccept}
         multiple={maxCount > 1}
       >
         {fileList.length >= maxCount ? null : mode === "picture-card" ? (

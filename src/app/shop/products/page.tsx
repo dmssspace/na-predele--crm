@@ -1,17 +1,18 @@
 "use client";
 
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, EyeOutlined } from "@ant-design/icons";
 import {
   CreateButton,
   DeleteButton,
-  EditButton,
   ImageField,
   List,
-  ShowButton,
   useTable,
+  useDrawerForm,
+  EditButton,
 } from "@refinedev/antd";
 import { type BaseRecord } from "@refinedev/core";
-import { Space, Table } from "antd";
+import { Space, Table, Button } from "antd";
+import { ProductEditDrawer, ProductCreateDrawer } from "@/components/shop";
 
 export default function ShopProductList() {
   const { result, tableProps } = useTable({
@@ -19,28 +20,63 @@ export default function ShopProductList() {
     resource: "shop/products",
   });
 
+  const {
+    drawerProps: editDrawerProps,
+    formProps: editFormProps,
+    show: editShow,
+    id: editId,
+    query: editQuery,
+  } = useDrawerForm({
+    action: "edit",
+    resource: "shop/products",
+    redirect: false,
+  });
+
+  const {
+    drawerProps: createDrawerProps,
+    formProps: createFormProps,
+    saveButtonProps: createSaveButtonProps,
+    show: createShow,
+  } = useDrawerForm({
+    action: "create",
+    resource: "shop/products",
+    redirect: false,
+  });
+
   return (
     <List
       headerButtons={({ createButtonProps }) => {
         if (createButtonProps) {
           return (
-            <CreateButton {...createButtonProps} icon={<PlusOutlined />}>
+            <CreateButton
+              {...createButtonProps}
+              icon={<PlusOutlined />}
+              onClick={() => createShow()}
+            >
               {"Добавить товар"}
             </CreateButton>
           );
         }
       }}
     >
-      <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="id" title={"ID"} />
+      <Table
+        {...tableProps}
+        rowKey="id"
+        onRow={(record) => ({
+          onClick: () => editShow(record.id),
+          style: { cursor: "pointer" },
+        })}
+      >
         <Table.Column
           render={(_, record) => (
-            <ImageField
-              value={record.image_url}
-              width={120}
-              height={120}
-              style={{ objectFit: "cover" }}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <ImageField
+                value={record.image_url}
+                width={120}
+                height={120}
+                style={{ objectFit: "cover" }}
+              />
+            </div>
           )}
           title={"Изображение"}
         />
@@ -78,8 +114,12 @@ export default function ShopProductList() {
           dataIndex="actions"
           render={(_, record: BaseRecord) => (
             <Space>
-              <EditButton hideText size="small" recordItemId={record?.id} />
-              <ShowButton hideText size="small" recordItemId={record?.id} />
+              <EditButton
+                hideText
+                size="small"
+                recordItemId={record?.id}
+                onClick={() => editShow(record?.id)}
+              />
               <DeleteButton
                 hideText
                 size="small"
@@ -90,6 +130,19 @@ export default function ShopProductList() {
           )}
         />
       </Table>
+
+      <ProductEditDrawer
+        drawerProps={editDrawerProps}
+        formProps={editFormProps}
+        editQuery={editQuery}
+        id={editId}
+      />
+
+      <ProductCreateDrawer
+        drawerProps={createDrawerProps}
+        formProps={createFormProps}
+        saveButtonProps={createSaveButtonProps}
+      />
     </List>
   );
 }

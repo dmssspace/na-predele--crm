@@ -13,7 +13,10 @@ import { type BaseRecord } from "@refinedev/core";
 import { Button, Space, Table } from "antd";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { CustomerEditDrawer } from "@/components/customers/CustomerEditDrawer";
+import {
+  CustomerEditDrawer,
+  CustomerCreateDrawer,
+} from "@/components/customers";
 import { Avatar } from "@/components/avatar";
 
 export default function CustomersList() {
@@ -41,20 +44,50 @@ export default function CustomersList() {
     },
   });
 
+  const {
+    formProps: createFormProps,
+    drawerProps: createDrawerProps,
+    saveButtonProps: createSaveButtonProps,
+    show: createShow,
+  } = useDrawerForm({
+    action: "create",
+    resource: "auth/register-customer",
+    redirect: false,
+    successNotification: {
+      message: "Клиент успешно зарегистрирован",
+      type: "success",
+    },
+    errorNotification: {
+      message: "Ошибка при регистрации клиента",
+      type: "error",
+    },
+  });
+
   return (
     <>
       <List
         headerButtons={({ createButtonProps }) => {
           if (createButtonProps) {
             return (
-              <CreateButton {...createButtonProps} icon={<UserAddOutlined />}>
+              <CreateButton
+                {...createButtonProps}
+                icon={<UserAddOutlined />}
+                onClick={() => createShow()}
+              >
                 {"Зарегистрировать клиента"}
               </CreateButton>
             );
           }
         }}
       >
-        <Table {...tableProps} rowKey="id">
+        <Table
+          {...tableProps}
+          rowKey="id"
+          onRow={(record) => ({
+            onClick: () => show(record.id),
+            style: { cursor: "pointer" },
+          })}
+        >
           <Table.Column
             dataIndex="full_name"
             title={"ФИО"}
@@ -180,6 +213,11 @@ export default function CustomersList() {
         editQuery={editQuery}
         formProps={formProps}
         id={id}
+      />
+      <CustomerCreateDrawer
+        drawerProps={createDrawerProps}
+        formProps={createFormProps}
+        saveButtonProps={createSaveButtonProps}
       />
     </>
   );

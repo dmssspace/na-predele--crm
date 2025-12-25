@@ -1,8 +1,10 @@
 export interface MediaFile {
   id: string;
   url: string;
+  public_url: string;
   filename: string;
   mime_type: string;
+  type: string;
   size: number;
   created_at?: string;
   updated_at?: string;

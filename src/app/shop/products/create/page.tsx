@@ -21,11 +21,18 @@ export default function ShopProductCreate() {
     ...formProps,
     onFinish: async (values: any) => {
       const formattedValues = {
-        ...values,
+        title: values.title,
         price: values.price ? parseFloat(values.price) : undefined,
         discount_percent: values.discount_percent
           ? parseFloat(values.discount_percent)
           : undefined,
+        description: values.description,
+        attached_media:
+          values.attached_media_ids?.map((mediaId: string, index: number) => ({
+            media_id: mediaId,
+            role: index === 0 ? "cover" : "gallery",
+            sort_order: index,
+          })) || [],
       };
 
       await formProps.onFinish?.(formattedValues);
@@ -136,6 +143,11 @@ export default function ShopProductCreate() {
           label={"Изображения товара"}
           name="attached_media_ids"
           tooltip="Выберите изображения товара из медиа-библиотеки"
+          rules={[
+            {
+              required: false,
+            },
+          ]}
         >
           <MediaSelector
             multiple={true}

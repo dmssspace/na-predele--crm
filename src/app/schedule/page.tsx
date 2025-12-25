@@ -1,9 +1,6 @@
-"use client";
-
 import React, { useState, useMemo } from "react";
 import { CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { List } from "@refinedev/antd";
-import { useCustom } from "@refinedev/core";
 import {
   Card,
   Badge,
@@ -12,13 +9,15 @@ import {
   Modal,
   Descriptions,
   Tag,
-  Empty,
+  Spin,
+  Alert,
 } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useTranslations } from "next-intl";
-import type { Session } from "@/types/schedule";
-import BookSessionModal from "../../components/schedule/BookSessionModal";
+import type { ScheduleSession, Schedule } from "@/types/schedule";
+import { scheduleApi } from "@/lib/api/schedule";
+import { useQuery } from "@tanstack/react-query";
 
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -34,50 +33,49 @@ import "./calendar.css";
 
 export default function SchedulePage() {
   const t = useTranslations("schedule.calendar");
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedSession, setSelectedSession] =
+    useState<ScheduleSession | null>(null);
   const [dateRange, setDateRange] = useState<{
     start: Date;
     end: Date;
   } | null>(null);
 
-  const scheduleQuery = useCustom({
-    url: "/schedule",
-    method: "get",
-    config: {
-      query: dateRange
-        ? {
-            from: dateRange.start.toISOString(),
-            to: dateRange.end.toISOString(),
-          }
-        : undefined,
+  // Fetch schedule data
+  const {
+    data: scheduleResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["schedule", dateRange?.start, dateRange?.end],
+    queryFn: () => {
+      if (!dateRange) return Promise.resolve({ data: [], status: "success" });
+      return scheduleApi.getSchedule(dateRange.start, dateRange.end);
     },
-    queryOptions: {
-      enabled: !!dateRange,
-    },
+    enabled: !!dateRange,
   });
-
-  const scheduleData = scheduleQuery.query.data;
-  const refetch = scheduleQuery.query.refetch;
 
   // Преобразуем данные сессий в события для FullCalendar
   const calendarEvents = useMemo(() => {
-    if (!scheduleData?.data?.data) return [];
+    const scheduleData = scheduleResponse?.data;
+    if (!scheduleData || !Array.isArray(scheduleData)) return [];
 
     const events: any[] = [];
-    scheduleData.data.data.forEach((dayData: any) => {
-      dayData.sessions.forEach((session: Session) => {
-        const percentage =
-          (session.bookings_count / session.event.clients_cap) * 100;
-        let backgroundColor = "#52c41a"; // success
-        if (percentage >= 90) backgroundColor = "#ff4d4f"; // error
-        else if (percentage >= 70) backgroundColor = "#faad14"; // warning
+    scheduleData.forEach((day: Schedule) => {
+      if (!day.sessions || !Array.isArray(day.sessions)) return;
+
+      day.sessions.forEach((session: ScheduleSession) => {
+        if (!session.event) return;
+
+        // Определяем цвет по статусу
+        let backgroundColor = "#52c41a"; // green для scheduled
+        if (session.status === "canceled") backgroundColor = "#d9d9d9"; // gray
+        else if (session.status === "completed") backgroundColor = "#1890ff"; // blue
 
         events.push({
           id: session.id,
-          title: `${session.event.trainer.short_name} - ${humanizeTrainingSpec(
-            session.event.training_spec
-          )}`,
+          title: `${
+            session.event.trainer?.short_name || "Тренер"
+          } - ${humanizeTrainingSpec(session.event.training_spec)}`,
           start: session.start_at,
           end: session.end_at,
           backgroundColor,
@@ -90,7 +88,7 @@ export default function SchedulePage() {
     });
 
     return events;
-  }, [scheduleData]);
+  }, [scheduleResponse]);
 
   const getTrainingTypeColor = (type: string) => {
     switch (type) {
@@ -105,14 +103,7 @@ export default function SchedulePage() {
     }
   };
 
-  const getCapacityColor = (current: number, max: number) => {
-    const percentage = (current / max) * 100;
-    if (percentage >= 90) return "error";
-    if (percentage >= 70) return "warning";
-    return "success";
-  };
-
-  function humanizeTrainingSpec(training_spec: string): React.ReactNode {
+  function humanizeTrainingSpec(training_spec: string): string {
     switch (training_spec) {
       case "box":
         return "Бокс";
@@ -129,8 +120,47 @@ export default function SchedulePage() {
     }
   }
 
+  function humanizeTrainingType(training_type: string): string {
+    switch (training_type) {
+      case "individual":
+        return "Индивидуальная";
+      case "group_adult":
+        return "Групповая (взрослые)";
+      case "group_child":
+        return "Групповая (дети)";
+      default:
+        return training_type;
+    }
+  }
+
+  function humanizeSessionStatus(status: string): string {
+    switch (status) {
+      case "scheduled":
+        return "Запланирована";
+      case "canceled":
+        return "Отменена";
+      case "completed":
+        return "Завершена";
+      default:
+        return status;
+    }
+  }
+
+  const getSessionStatusColor = (status: string) => {
+    switch (status) {
+      case "scheduled":
+        return "green";
+      case "canceled":
+        return "default";
+      case "completed":
+        return "blue";
+      default:
+        return "default";
+    }
+  };
+
   const handleEventClick = (info: EventClickArg) => {
-    const session = info.event.extendedProps.session as Session;
+    const session = info.event.extendedProps.session as ScheduleSession;
     setSelectedSession(session);
   };
 
@@ -146,47 +176,59 @@ export default function SchedulePage() {
       title={
         <Space>
           <CalendarOutlined />
-          {t("title", { default: "Календарь расписания" })}
+          {t("title", { default: "Расписание" })}
         </Space>
       }
     >
-      <Card>
-        <FullCalendar
-          plugins={[timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "timeGridWeek,timeGridDay",
-          }}
-          locale={ruLocale}
-          firstDay={1}
-          slotMinTime="07:00:00"
-          slotMaxTime="23:00:00"
-          allDaySlot={false}
-          height="auto"
-          events={calendarEvents}
-          eventClick={handleEventClick}
-          datesSet={handleDatesSet}
-          slotDuration="00:30:00"
-          slotLabelInterval="01:00:00"
-          nowIndicator={true}
-          eventTimeFormat={{
-            hour: "2-digit",
-            minute: "2-digit",
-            meridiem: false,
-          }}
-          slotLabelFormat={{
-            hour: "2-digit",
-            minute: "2-digit",
-            meridiem: false,
-          }}
-          buttonText={{
-            today: "Сегодня",
-            week: "Неделя",
-            day: "День",
-          }}
+      {error && (
+        <Alert
+          message="Ошибка загрузки"
+          description="Не удалось загрузить расписание. Проверьте подключение к серверу."
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
         />
+      )}
+
+      <Card>
+        <Spin spinning={isLoading}>
+          <FullCalendar
+            plugins={[timeGridPlugin, interactionPlugin]}
+            initialView="timeGridWeek"
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title",
+              right: "timeGridWeek,timeGridDay",
+            }}
+            locale={ruLocale}
+            firstDay={1}
+            slotMinTime="07:00:00"
+            slotMaxTime="23:00:00"
+            allDaySlot={false}
+            height="auto"
+            events={calendarEvents}
+            eventClick={handleEventClick}
+            datesSet={handleDatesSet}
+            slotDuration="00:30:00"
+            slotLabelInterval="01:00:00"
+            nowIndicator={true}
+            eventTimeFormat={{
+              hour: "2-digit",
+              minute: "2-digit",
+              meridiem: false,
+            }}
+            slotLabelFormat={{
+              hour: "2-digit",
+              minute: "2-digit",
+              meridiem: false,
+            }}
+            buttonText={{
+              today: "Сегодня",
+              week: "Неделя",
+              day: "День",
+            }}
+          />
+        </Spin>
       </Card>
 
       {/* Session Details Modal */}
@@ -194,32 +236,25 @@ export default function SchedulePage() {
         title={
           <Space>
             <ClockCircleOutlined />
-            {t("details")}
+            Детали тренировки
           </Space>
         }
-        open={!!selectedSession && !showBookingModal}
+        open={!!selectedSession}
         onCancel={() => setSelectedSession(null)}
         footer={[
           <Button key="cancel" onClick={() => setSelectedSession(null)}>
             Закрыть
           </Button>,
-          <Button
-            key="book"
-            type="primary"
-            onClick={() => setShowBookingModal(true)}
-          >
-            {t("book")}
-          </Button>,
         ]}
         width={700}
       >
-        {selectedSession && (
+        {selectedSession && selectedSession.event && (
           <>
             <Descriptions column={2} bordered>
-              <Descriptions.Item label={t("trainer")}>
-                {selectedSession.event.trainer.full_name}
+              <Descriptions.Item label="Тренер">
+                {selectedSession.event.trainer?.full_name || "Не указан"}
               </Descriptions.Item>
-              <Descriptions.Item label={t("time")}>
+              <Descriptions.Item label="Время">
                 {format(parseISO(selectedSession.start_at), "HH:mm", {
                   locale: ru,
                 })}{" "}
@@ -228,88 +263,52 @@ export default function SchedulePage() {
                   locale: ru,
                 })}
               </Descriptions.Item>
-              <Descriptions.Item label={t("type")}>
+              <Descriptions.Item label="Тип тренировки">
                 <Tag
                   color={getTrainingTypeColor(
                     selectedSession.event.training_type
                   )}
                 >
-                  {selectedSession.event.training_type}
+                  {humanizeTrainingType(selectedSession.event.training_type)}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label={t("specialization")}>
+              <Descriptions.Item label="Специализация">
                 {humanizeTrainingSpec(selectedSession.event.training_spec)}
               </Descriptions.Item>
-              <Descriptions.Item label={t("capacity")} span={2}>
+              <Descriptions.Item label="Вместимость">
                 <Badge
-                  status={getCapacityColor(
-                    selectedSession.bookings_count,
-                    selectedSession.event.clients_cap
-                  )}
-                  text={`${selectedSession.bookings_count}/${selectedSession.event.clients_cap}`}
+                  status="success"
+                  text={`${selectedSession.event.clients_cap} мест`}
                 />
+              </Descriptions.Item>
+              <Descriptions.Item label="Статус">
+                <Tag color={getSessionStatusColor(selectedSession.status)}>
+                  {humanizeSessionStatus(selectedSession.status)}
+                </Tag>
               </Descriptions.Item>
             </Descriptions>
 
-            <Card
-              title={`${t("participants")} (${
-                selectedSession.bookings.length
-              })`}
-              style={{ marginTop: 16 }}
-              size="small"
-            >
-              {selectedSession.bookings.length === 0 ? (
-                <Empty description={t("noBookings")} />
-              ) : (
-                <Space direction="vertical" style={{ width: "100%" }}>
-                  {selectedSession.bookings.map((booking) => (
-                    <Card key={booking.id} size="small">
-                      <Space
-                        style={{
-                          width: "100%",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <span>{booking.customer_name}</span>
-                        <Space>
-                          {booking.has_ticket && (
-                            <Tag color="green">🎫 Абонемент</Tag>
-                          )}
-                          <Tag
-                            color={
-                              booking.status === "confirmed"
-                                ? "success"
-                                : "default"
-                            }
-                          >
-                            {booking.status}
-                          </Tag>
-                        </Space>
-                      </Space>
-                    </Card>
-                  ))}
-                </Space>
+            <Card title="Информация" style={{ marginTop: 16 }} size="small">
+              <p>
+                <strong>Дата:</strong>{" "}
+                {format(parseISO(selectedSession.start_at), "dd MMMM yyyy", {
+                  locale: ru,
+                })}
+              </p>
+              {selectedSession.event.type === "recurring" && (
+                <p>
+                  <Tag color="blue">Регулярная тренировка</Tag>
+                </p>
+              )}
+              {selectedSession.event.type === "once" && (
+                <p>
+                  <Tag color="orange">Разовая тренировка</Tag>
+                </p>
               )}
             </Card>
           </>
         )}
       </Modal>
-
-      {/* Booking Modal */}
-      {showBookingModal && selectedSession && (
-        <BookSessionModal
-          session={selectedSession}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedSession(null);
-          }}
-          onSuccess={() => {
-            refetch();
-            setShowBookingModal(false);
-            setSelectedSession(null);
-          }}
-        />
-      )}
     </List>
   );
 }

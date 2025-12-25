@@ -172,7 +172,11 @@
       "quick-visit": "Регистрация визита",
       "bookings": "Список бронирований",
       "events": "События расписания",
-      "visits": "История визитов"
+      "visits": "История визитов",
+      "availability": "Расписание работы зала"
+    },
+    "availability": {
+      "title": "Расписание работы зала"
     },
     "calendar": {
       "week": "Неделя",
@@ -334,7 +338,7 @@
       "availableSpots": "Свободно мест"
     }
   },
-  "shop-products": {
+  "shop/products": {
     "titles": {
       "create": "Добавить товар",
       "edit": "Изменить товар",

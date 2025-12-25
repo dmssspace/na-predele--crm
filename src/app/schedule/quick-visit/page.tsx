@@ -6,31 +6,30 @@ import {
   SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Create, useForm } from "@refinedev/antd";
-import { useCustom, useInvalidate, useNotification } from "@refinedev/core";
+import { Create } from "@refinedev/antd";
 import {
   Alert,
   Button,
   Card,
-  Divider,
   Form,
   Input,
-  List as AntList,
   Radio,
-  Select,
   Space,
   Typography,
+  Spin,
+  Empty,
+  Tag,
+  message,
 } from "antd";
 import { useTranslations } from "next-intl";
-import { scheduleApi } from "@/lib/api/schedule";
-import type { CustomerSearchResult, Ticket } from "@/types/schedule";
+import { customersApi, ticketsApi, visitsApi } from "@/lib/api/schedule";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { CustomerSearchResult, CustomerTicket } from "@/types/schedule";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 export default function QuickVisitPage() {
   const t = useTranslations("schedule.quickVisit");
-  const invalidate = useInvalidate();
-  const { open } = useNotification();
   const [form] = Form.useForm();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,239 +38,261 @@ export default function QuickVisitPage() {
   const [registrationMode, setRegistrationMode] = useState<
     "with_ticket" | "without_ticket"
   >("with_ticket");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<CustomerSearchResult[]>(
+    []
+  );
 
-  // Search customers
-  const searchQuery_custom = useCustom<{
-    data: CustomerSearchResult[];
-  }>({
-    url: "/customers/search",
-    method: "get",
-    config: {
-      query: { q: searchQuery },
-    },
-    queryOptions: {
-      enabled: false,
-    },
+  // Get customer tickets
+  const { data: ticketsResponse, isLoading: isLoadingTickets } = useQuery({
+    queryKey: ["customer-tickets", selectedCustomer?.id],
+    queryFn: () =>
+      selectedCustomer
+        ? ticketsApi.getCustomerTickets(selectedCustomer.id)
+        : Promise.resolve({ status: "success", data: [] }),
+    enabled: !!selectedCustomer && registrationMode === "with_ticket",
   });
 
-  const searchResults = searchQuery_custom.query.data;
-  const searchCustomers = searchQuery_custom.query.refetch;
+  const tickets = ticketsResponse?.data || [];
 
-  // Get active tickets
-  const ticketsQuery = useCustom<{ data: Ticket[] }>({
-    url: "/tickets",
-    method: "get",
-    config: {
-      query: {
-        customer_id: selectedCustomer?.id,
-        status: "active",
-      },
-    },
-    queryOptions: {
-      enabled: !!selectedCustomer && registrationMode === "with_ticket",
-    },
-  });
-
-  const ticketsData = ticketsQuery.query.data;
-
-  const { formProps, saveButtonProps, onFinish } = useForm({
-    action: "create",
-    resource: "visits",
-    redirect: false,
-    onMutationSuccess: () => {
-      open?.({
-        type: "success",
-        message: t("success"),
-      });
+  // Create visit mutation
+  const createVisitMutation = useMutation({
+    mutationFn: visitsApi.createVisit,
+    onSuccess: () => {
+      message.success("Визит успешно зарегистрирован!");
       form.resetFields();
       setSelectedCustomer(null);
       setSearchQuery("");
-      invalidate({ resource: "schedule/visits", invalidates: ["list"] });
+      setSearchResults([]);
+    },
+    onError: (error: any) => {
+      message.error(
+        error?.response?.data?.error || "Ошибка при регистрации визита"
+      );
     },
   });
 
-  const handleSearch = () => {
-    if (searchQuery.trim().length >= 2) {
-      searchCustomers();
+  const handleSearch = async () => {
+    if (searchQuery.trim().length < 2) {
+      message.warning("Введите минимум 2 символа для поиска");
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await customersApi.searchCustomers(searchQuery);
+      setSearchResults(response.data || []);
+    } catch (error) {
+      message.error("Ошибка поиска клиентов");
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
     }
   };
 
   const handleSelectCustomer = (customer: CustomerSearchResult) => {
     setSelectedCustomer(customer);
+    setSearchResults([]);
     form.setFieldsValue({ customer_id: customer.id });
   };
 
   const handleSubmit = async (values: any) => {
-    try {
-      if (registrationMode === "with_ticket") {
-        await scheduleApi.registerVisit({
-          customer_id: values.customer_id,
-          ticket_id: values.ticket_id,
-        });
-      } else {
-        await scheduleApi.registerVisit({
-          customer_id: values.customer_id,
-        });
-      }
-      open?.({
-        type: "success",
-        message: "Посещение зарегистрировано",
-      });
-      form.resetFields();
-      setSelectedCustomer(null);
-      setSearchQuery("");
-      invalidate({ resource: "visits", invalidates: ["list"] });
-    } catch (error) {
-      open?.({
-        type: "error",
-        message: "Ошибка регистрации",
-      });
+    if (!selectedCustomer) {
+      message.error("Выберите клиента");
+      return;
     }
-  };
 
-  const activeTickets = ticketsData?.data?.data || [];
+    const visitData = {
+      customer_id: selectedCustomer.id,
+      ticket_id:
+        registrationMode === "with_ticket" ? values.ticket_id : undefined,
+      is_charged: registrationMode === "without_ticket",
+    };
+
+    createVisitMutation.mutate(visitData);
+  };
 
   return (
     <Create
       title={
         <Space>
           <CheckCircleOutlined />
-          {t("title", { default: "Быстрая регистрация посещения" })}
+          {t("title", { default: "Быстрая регистрация визита" })}
         </Space>
       }
-      saveButtonProps={{ style: { display: "none" } }}
+      footerButtons={() => <></>}
     >
-      <Card>
-        {/* Customer Search */}
-        <div style={{ marginBottom: 24 }}>
-          <Title level={5}>1. Поиск клиента</Title>
+      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        {/* Поиск клиента */}
+        <Card title="1. Найдите клиента" style={{ marginBottom: 16 }}>
           <Space.Compact style={{ width: "100%" }}>
             <Input
               size="large"
-              placeholder="ФИО или номер телефона"
+              placeholder="Введите имя, телефон или email клиента"
+              prefix={<SearchOutlined />}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onPressEnter={handleSearch}
-              prefix={<SearchOutlined />}
             />
-            <Button size="large" type="primary" onClick={handleSearch}>
+            <Button
+              size="large"
+              type="primary"
+              onClick={handleSearch}
+              loading={isSearching}
+            >
               Найти
             </Button>
           </Space.Compact>
 
-          {searchResults?.data?.data && searchResults.data.data.length > 0 && (
-            <Card size="small" style={{ marginTop: 16 }}>
-              <AntList
-                dataSource={searchResults.data.data}
-                renderItem={(customer: CustomerSearchResult) => (
-                  <AntList.Item
+          {/* Результаты поиска */}
+          {searchResults.length > 0 && (
+            <Card style={{ marginTop: 16 }} size="small">
+              <Space direction="vertical" style={{ width: "100%" }}>
+                {searchResults.map((customer) => (
+                  <Card
+                    key={customer.id}
+                    size="small"
+                    hoverable
                     onClick={() => handleSelectCustomer(customer)}
                     style={{
                       cursor: "pointer",
-                      backgroundColor:
+                      borderColor:
                         selectedCustomer?.id === customer.id
-                          ? "#e6f7ff"
+                          ? "#1890ff"
                           : undefined,
                     }}
                   >
-                    <AntList.Item.Meta
-                      avatar={<UserOutlined style={{ fontSize: 24 }} />}
-                      title={`${customer.first_name} ${customer.last_name}`}
-                      description={customer.phone}
-                    />
-                  </AntList.Item>
-                )}
-              />
+                    <Space>
+                      <UserOutlined />
+                      <div>
+                        <Text strong>{customer.full_name}</Text>
+                        <br />
+                        <Text type="secondary">
+                          {customer.user?.phone_number || customer.phone_number}
+                        </Text>
+                      </div>
+                    </Space>
+                  </Card>
+                ))}
+              </Space>
             </Card>
           )}
-        </div>
 
-        {selectedCustomer && (
-          <>
-            <Divider />
-
-            {/* Registration Mode */}
-            <div style={{ marginBottom: 24 }}>
-              <Title level={5}>2. Тип посещения</Title>
-              <Radio.Group
-                value={registrationMode}
-                onChange={(e) => setRegistrationMode(e.target.value)}
-              >
-                <Space direction="vertical">
-                  <Radio value="with_ticket">С абонементом</Radio>
-                  <Radio value="without_ticket">
-                    Без абонемента (бесплатно)
-                  </Radio>
+          {/* Выбранный клиент */}
+          {selectedCustomer && (
+            <Alert
+              message={
+                <Space>
+                  <UserOutlined />
+                  <Text strong>Выбран: {selectedCustomer.full_name}</Text>
                 </Space>
-              </Radio.Group>
-            </div>
+              }
+              type="success"
+              showIcon
+              style={{ marginTop: 16 }}
+              closable
+              onClose={() => {
+                setSelectedCustomer(null);
+                form.resetFields();
+              }}
+            />
+          )}
+        </Card>
 
-            {/* Ticket Selection */}
-            {registrationMode === "with_ticket" && (
-              <>
-                <Divider />
-                <div style={{ marginBottom: 24 }}>
-                  <Title level={5}>3. Выбор абонемента</Title>
-                  {activeTickets.length === 0 ? (
-                    <Alert
-                      message="У клиента нет активных абонементов"
-                      type="warning"
-                      showIcon
-                    />
-                  ) : (
-                    <Form form={form} onFinish={handleSubmit}>
-                      <Form.Item name="customer_id" hidden>
-                        <Input />
-                      </Form.Item>
-                      <Form.Item
-                        name="ticket_id"
-                        rules={[
-                          { required: true, message: "Выберите абонемент" },
-                        ]}
-                      >
-                        <Select size="large" placeholder="Выберите абонемент">
-                          {activeTickets.map((ticket: Ticket) => (
-                            <Select.Option key={ticket.id} value={ticket.id}>
-                              {ticket.plan_name} (осталось:{" "}
-                              {ticket.remaining_visits})
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                      <Button
-                        type="primary"
-                        size="large"
-                        htmlType="submit"
-                        block
-                        icon={<CheckCircleOutlined />}
-                      >
-                        Зарегистрировать посещение
-                      </Button>
-                    </Form>
-                  )}
-                </div>
-              </>
-            )}
-
-            {registrationMode === "without_ticket" && (
-              <>
-                <Divider />
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  icon={<CheckCircleOutlined />}
-                  onClick={() =>
-                    handleSubmit({ customer_id: selectedCustomer.id })
-                  }
-                >
-                  Зарегистрировать бесплатное посещение
-                </Button>
-              </>
-            )}
-          </>
+        {/* Тип регистрации */}
+        {selectedCustomer && (
+          <Card title="2. Выберите тип посещения" style={{ marginBottom: 16 }}>
+            <Radio.Group
+              value={registrationMode}
+              onChange={(e) => {
+                setRegistrationMode(e.target.value);
+                form.resetFields(["ticket_id"]);
+              }}
+              style={{ width: "100%" }}
+            >
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Radio value="with_ticket">
+                  <Space>
+                    🎫 По абонементу
+                    <Text type="secondary">(списать визит с абонемента)</Text>
+                  </Space>
+                </Radio>
+                <Radio value="without_ticket">
+                  <Space>
+                    💰 Разовое посещение
+                    <Text type="secondary">(оплачено)</Text>
+                  </Space>
+                </Radio>
+              </Space>
+            </Radio.Group>
+          </Card>
         )}
-      </Card>
+
+        {/* Выбор абонемента */}
+        {selectedCustomer && registrationMode === "with_ticket" && (
+          <Card title="3. Выберите абонемент" style={{ marginBottom: 16 }}>
+            {isLoadingTickets ? (
+              <Spin />
+            ) : tickets.length === 0 ? (
+              <Empty description="У клиента нет активных абонементов" />
+            ) : (
+              <Form.Item
+                name="ticket_id"
+                rules={[{ required: true, message: "Выберите абонемент" }]}
+              >
+                <Radio.Group style={{ width: "100%" }}>
+                  <Space direction="vertical" style={{ width: "100%" }}>
+                    {tickets
+                      .filter((ticket) => ticket.status === "active")
+                      .map((ticket) => (
+                        <Card key={ticket.id} size="small">
+                          <Radio value={ticket.id} style={{ width: "100%" }}>
+                            <Space direction="vertical">
+                              <Text strong>
+                                {ticket.plan?.title || "Абонемент"}
+                              </Text>
+                              <Space>
+                                <Tag color="blue">
+                                  Осталось визитов: {ticket.remaining_visits}
+                                </Tag>
+                                <Tag
+                                  color={
+                                    new Date(ticket.end_date) > new Date()
+                                      ? "green"
+                                      : "red"
+                                  }
+                                >
+                                  До:{" "}
+                                  {new Date(ticket.end_date).toLocaleDateString(
+                                    "ru"
+                                  )}
+                                </Tag>
+                              </Space>
+                            </Space>
+                          </Radio>
+                        </Card>
+                      ))}
+                  </Space>
+                </Radio.Group>
+              </Form.Item>
+            )}
+          </Card>
+        )}
+
+        {/* Кнопка регистрации */}
+        {selectedCustomer && (
+          <Button
+            type="primary"
+            size="large"
+            htmlType="submit"
+            icon={<CheckCircleOutlined />}
+            loading={createVisitMutation.isPending}
+            block
+          >
+            Зарегистрировать визит
+          </Button>
+        )}
+      </Form>
     </Create>
   );
 }
