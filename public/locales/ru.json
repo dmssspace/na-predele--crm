@@ -192,7 +192,20 @@
       "participants": "Участники",
       "noBookings": "Пока нет записей",
       "book": "Забронировать",
-      "cancelSession": "Отменить сессию"
+      "cancelSession": "Отменить сессию",
+      "instantButton": "Записать персонально",
+      "instantModal": {
+        "title": "Моментальная персональная запись",
+        "trainer": "Тренер",
+        "customer": "Клиент",
+        "startTime": "Время начала",
+        "chargeNow": "Списать сейчас",
+        "selectTicket": "Выберите абонемент",
+        "success": "Персональный визит создан",
+        "onlyStaff": "Только сотрудник",
+        "trainerBusy": "Тренер занят в это время",
+        "invalidTime": "Неверный формат времени"
+      }
     },
     "quickVisit": {
       "title": "Отметить посещение",

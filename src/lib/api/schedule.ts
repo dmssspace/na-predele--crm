@@ -6,10 +6,19 @@ import type {
   ApiTicketsResponse,
   ApiCustomerSearchResponse,
   CreateVisitRequest,
+  CreateInstantEventRequest,
   ApiResponse,
   Availability,
   UpdateWeekdayAvailabilityRequest,
+  BookSessionRequest,
+  CreateOnceEventRequest,
+  CancelBookingRequest,
+  RegisterVisitRequest,
 } from "@/types/schedule";
+
+// Create instant (staff-only) event
+// POST /schedule/events/instant
+
 
 const api = axios.create({
   baseURL: `${API_URL}`,
@@ -51,6 +60,57 @@ export const scheduleApi = {
       "/schedule/availability",
       data
     );
+    return response.data;
+  },
+
+  // Book a session
+  // POST /schedule/sessions/:id/book
+  bookSession: async (
+    sessionId: string,
+    data: BookSessionRequest
+  ): Promise<ApiResponse> => {
+    const response = await api.post<ApiResponse>(
+      `/schedule/sessions/${sessionId}/book`,
+      data
+    );
+    return response.data;
+  },
+
+  // Create a one-time event (and auto create session + booking)
+  // POST /schedule/events/once
+  createOnceEvent: async (
+    data: CreateOnceEventRequest
+  ): Promise<ApiResponse> => {
+    const response = await api.post<ApiResponse>(`/schedule/events/once`, data);
+    return response.data;
+  },
+
+  // Create an instant personal event (staff-only): creates event -> session -> booking -> visit atomically
+  // POST /schedule/events/instant
+  createInstantEvent: async (
+    data: CreateInstantEventRequest
+  ): Promise<ApiResponse<{ id: string }>> => {
+    const response = await api.post<ApiResponse<{ id: string }>>(
+      `/schedule/events/instant`,
+      data
+    );
+    return response.data;
+  },
+
+  // Register visit by booking id
+  // POST /schedule/bookings/:id/visit
+  registerVisitFromBooking: async (bookingId: string): Promise<ApiResponse> => {
+    const response = await api.post<ApiResponse>(`/schedule/bookings/${bookingId}/visit`);
+    return response.data;
+  },
+
+  // Cancel booking
+  // POST /schedule/bookings/:id/cancel
+  cancelBooking: async (
+    bookingId: string,
+    data: CancelBookingRequest
+  ): Promise<ApiResponse> => {
+    const response = await api.post<ApiResponse>(`/schedule/bookings/${bookingId}/cancel`, data);
     return response.data;
   },
 };

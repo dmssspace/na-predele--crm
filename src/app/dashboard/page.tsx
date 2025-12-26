@@ -16,6 +16,7 @@ import {
   UserOutlined,
   DollarOutlined,
 } from "@ant-design/icons";
+import SquareButton from "@components/primitives/button/square/SquareButton";
 
 const { Title } = Typography;
 
@@ -72,14 +73,14 @@ export default function DashboardPage() {
       <Row gutter={16}>
         <Col span={12}>
           <Card title="Быстрые действия" style={{ height: "100%" }}>
-            <Button
-              type="primary"
+            <SquareButton
+              // type="primary"
               size="large"
+              icon={<UserOutlined />}
+              label={"Отметить посещение"}
               onClick={() => router.push("/schedule/quick-visit")}
               style={{ marginBottom: 16 }}
-            >
-              Отметить визит
-            </Button>
+            />
           </Card>
         </Col>
         <Col span={12}>

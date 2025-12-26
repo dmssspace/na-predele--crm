@@ -66,12 +66,22 @@ export default function EventsPage() {
         </Space>
       }
       headerButtons={() => (
-        <CreateButton
-          icon={<PlusOutlined />}
-          onClick={() => go({ to: "/schedule/events/create/recurring" })}
-        >
-          Создать регулярную тренировку
-        </CreateButton>
+        <>
+          <CreateButton
+            icon={<PlusOutlined />}
+            onClick={() => go({ to: "/schedule/events/create/recurring" })}
+          >
+            Создать регулярную тренировку
+          </CreateButton>
+
+          <CreateButton
+            style={{ marginLeft: 12 }}
+            icon={<PlusOutlined />}
+            onClick={() => go({ to: "/schedule/events/create/once" })}
+          >
+            Создать разовое занятие
+          </CreateButton>
+        </>
       )}
     >
       <Form {...searchFormProps} form={form} layout="inline" style={{ marginBottom: 16 }}>

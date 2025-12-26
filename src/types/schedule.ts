@@ -239,6 +239,14 @@ export interface CreateOnceEventRequest {
   start_time: string; // ISO 8601
 }
 
+export interface CreateInstantEventRequest {
+  trainer_id: string;
+  customer_id: string;
+  start_time: string; // ISO 8601
+  ticket_id?: string;
+  is_charged?: boolean;
+}
+
 export interface Visit {
   id: string;
   customer_name: string;

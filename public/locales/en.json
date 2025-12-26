@@ -166,7 +166,19 @@
   "schedule": {
     "titles": {
       "calendar": "Schedule Calendar",
-      "quick-visit": "Visit Registration",
+      "instantButton": "Instant personal",
+      "instantModal": {
+        "title": "Instant personal booking",
+        "trainer": "Trainer",
+        "customer": "Customer",
+        "startTime": "Start time",
+        "chargeNow": "Charge now",
+        "selectTicket": "Choose ticket",
+        "success": "Personal visit created",
+        "onlyStaff": "Staff only",
+        "trainerBusy": "Trainer is busy at that time",
+        "invalidTime": "Invalid time format"
+      },      "quick-visit": "Visit Registration",
       "bookings": "Bookings List",
       "events": "Schedule Events",
       "visits": "Visit History",

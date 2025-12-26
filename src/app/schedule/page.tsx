@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import { CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { List } from "@refinedev/antd";
@@ -18,6 +20,8 @@ import { useTranslations } from "next-intl";
 import type { ScheduleSession, Schedule } from "@/types/schedule";
 import { scheduleApi } from "@/lib/api/schedule";
 import { useQuery } from "@tanstack/react-query";
+import BookSessionModal from "@/components/schedule/BookSessionModal";
+import InstantPersonalModal from "@/components/schedule/InstantPersonalModal";
 
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -45,6 +49,7 @@ export default function SchedulePage() {
     data: scheduleResponse,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["schedule", dateRange?.start, dateRange?.end],
     queryFn: () => {
@@ -53,6 +58,9 @@ export default function SchedulePage() {
     },
     enabled: !!dateRange,
   });
+
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isInstantOpen, setIsInstantOpen] = useState(false);
 
   // Преобразуем данные сессий в события для FullCalendar
   const calendarEvents = useMemo(() => {
@@ -191,6 +199,11 @@ export default function SchedulePage() {
       )}
 
       <Card>
+        <Space style={{ marginBottom: 12 }}>
+          <Button type="primary" onClick={() => setIsInstantOpen(true)}>
+            {t("instantButton")}
+          </Button>
+        </Space>
         <Spin spinning={isLoading}>
           <FullCalendar
             plugins={[timeGridPlugin, interactionPlugin]}
@@ -244,6 +257,18 @@ export default function SchedulePage() {
         footer={[
           <Button key="cancel" onClick={() => setSelectedSession(null)}>
             Закрыть
+          </Button>,
+          <Button
+            key="book"
+            type="primary"
+            disabled={
+              !selectedSession ||
+              (((selectedSession as any)?.bookings_count ?? 0) >=
+                (selectedSession?.event?.clients_cap ?? 0))
+            }
+            onClick={() => setIsBookingOpen(true)}
+          >
+            Забронировать
           </Button>,
         ]}
         width={700}
@@ -309,6 +334,28 @@ export default function SchedulePage() {
           </>
         )}
       </Modal>
+
+      {isBookingOpen && selectedSession && (
+        <BookSessionModal
+          session={selectedSession as any}
+          onClose={() => setIsBookingOpen(false)}
+          onSuccess={() => {
+            setIsBookingOpen(false);
+            setSelectedSession(null);
+            refetch();
+          }}
+        />
+      )}
+
+      {isInstantOpen && (
+        <InstantPersonalModal
+          onClose={() => setIsInstantOpen(false)}
+          onSuccess={() => {
+            setIsInstantOpen(false);
+            refetch();
+          }}
+        />
+      )}
     </List>
   );
 }

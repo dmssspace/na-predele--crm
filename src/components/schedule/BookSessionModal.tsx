@@ -113,8 +113,18 @@ export default function BookSessionModal({
       
       onSuccess?.();
       onClose();
-    } catch (error) {
-      message.error(t("error"));
+    } catch (error: any) {
+      // Handle known backend errors
+      const errCode = error?.response?.data?.error?.code;
+      const errMsg = error?.response?.data?.error?.message || error?.response?.data?.message;
+
+      if (errCode === "session_full" || errMsg?.toLowerCase()?.includes("full")) {
+        message.error(t("fullMessage") || "Тренировка заполнена");
+      } else if (errCode === "ticket_invalid" || errMsg?.toLowerCase()?.includes("ticket")) {
+        message.error(t("error") || "Проблема с абонементом");
+      } else {
+        message.error(t("error"));
+      }
     }
   };
 
