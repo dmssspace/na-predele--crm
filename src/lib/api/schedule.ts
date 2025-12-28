@@ -85,18 +85,6 @@ export const scheduleApi = {
     return response.data;
   },
 
-  // Create an instant personal event (staff-only): creates event -> session -> booking -> visit atomically
-  // POST /schedule/events/instant
-  createInstantEvent: async (
-    data: CreateInstantEventRequest
-  ): Promise<ApiResponse<{ id: string }>> => {
-    const response = await api.post<ApiResponse<{ id: string }>>(
-      `/schedule/events/instant`,
-      data
-    );
-    return response.data;
-  },
-
   // Register visit by booking id
   // POST /schedule/bookings/:id/visit
   registerVisitFromBooking: async (bookingId: string): Promise<ApiResponse> => {

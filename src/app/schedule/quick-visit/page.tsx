@@ -21,15 +21,13 @@ import {
   Tag,
   message,
 } from "antd";
-import { useTranslations } from "next-intl";
 import { customersApi, ticketsApi, visitsApi } from "@/lib/api/schedule";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { CustomerSearchResult, CustomerTicket } from "@/types/schedule";
+import type { CustomerSearchResult } from "@/types/schedule";
 
 const { Text } = Typography;
 
 export default function QuickVisitPage() {
-  const t = useTranslations("schedule.quickVisit");
   const [form] = Form.useForm();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -117,7 +115,7 @@ export default function QuickVisitPage() {
       title={
         <Space>
           <CheckCircleOutlined />
-          {t("title", { default: "Быстрая регистрация визита" })}
+          Быстрая регистрация визита
         </Space>
       }
       footerButtons={() => <></>}

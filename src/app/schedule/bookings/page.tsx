@@ -12,14 +12,13 @@ import { useInvalidate, useNotification } from "@refinedev/core";
 import { Button, DatePicker, Form, Select, Space, Table, Tag } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
-import { useTranslations } from "next-intl";
 import type { Booking } from "@/types/schedule";
 import { scheduleApi } from "@/lib/api/schedule";
 
 const { RangePicker } = DatePicker;
 
+
 export default function BookingsPage() {
-  const t = useTranslations("schedule.bookings");
   const invalidate = useInvalidate();
   const { open } = useNotification();
   const [form] = Form.useForm();
@@ -60,13 +59,13 @@ export default function BookingsPage() {
       await scheduleApi.registerVisitFromBooking(bookingId);
       open?.({
         type: "success",
-        message: t("visitRegistered"),
+        message: "Посещение зарегистрирован",
       });
       invalidate({ resource: "bookings", invalidates: ["list"] });
     } catch (error) {
       open?.({
         type: "error",
-        message: t("visitError"),
+        message: "Ошибка при регистрации посещения",
       });
     }
   };
@@ -76,13 +75,13 @@ export default function BookingsPage() {
       await scheduleApi.cancelBooking(bookingId, { canceled_by: "user" });
       open?.({
         type: "success",
-        message: t("cancelSuccess"),
+        message: "Бронирование отменено",
       });
       invalidate({ resource: "bookings", invalidates: ["list"] });
     } catch (error) {
       open?.({
         type: "error",
-        message: t("cancelError"),
+        message: "Ошибка при отмене бронированияы",
       });
     }
   };
@@ -92,7 +91,7 @@ export default function BookingsPage() {
       title={
         <Space>
           <BookOutlined />
-          {t("title", { default: "Бронирования" })}
+          {"Бронирования"}
         </Space>
       }
     >
@@ -103,11 +102,7 @@ export default function BookingsPage() {
         style={{ marginBottom: 16 }}
       >
         <Form.Item name="status">
-          <Select
-            allowClear
-            placeholder={t("filters.status")}
-            style={{ width: 200 }}
-          >
+          <Select allowClear placeholder="Статус" style={{ width: 200 }}>
             <Select.Option value="requested">Запрошено</Select.Option>
             <Select.Option value="confirmed">Подтверждено</Select.Option>
             <Select.Option value="canceled">Отменено</Select.Option>
@@ -116,7 +111,7 @@ export default function BookingsPage() {
 
         <Form.Item name="dateRange">
           <RangePicker
-            placeholder={[t("filters.dateFrom"), t("filters.dateTo")]}
+            placeholder={["Дата с", "Дата по"]}
             format="DD.MM.YYYY"
           />
         </Form.Item>
@@ -129,20 +124,36 @@ export default function BookingsPage() {
       </Form>
 
       <Table {...tableProps} rowKey="id">
-        <Table.Column
-          dataIndex="customer_name"
-          title={t("table.customer")}
-          render={(value) => (
-            <Space>
-              <UserOutlined />
-              {value}
-            </Space>
-          )}
-        />
+{/* //
+//     "data": [
+//         {
+//             "id": "49a281fe-a233-4461-ad06-05222bcbd113",
+//             "session_id": "0cc82c7a-e910-4650-a745-3cdd5df50207",
+//             "customer_id": "cc229bea-ab73-4da3-8c6a-b75eadfa50bf",
+//             "status": "confirmed",
+//             "created_at": "2025-12-26T21:39:46.192068Z",
+//             "updated_at": "2025-12-26T21:39:46.192068Z",
+//             "session": {
+//                 "id": "0cc82c7a-e910-4650-a745-3cdd5df50207",
+//                 "start_at": "2025-12-28T10:45:00Z",
+//                 "end_at": "2025-12-28T11:45:00Z",
+//                 "status": "scheduled"
+//             }
+//         }
+//     ],
+//     "pagination": {
+//         "total": 1,
+//         "per_page": 10,
+//         "page": 1,
+//         "last_page": 1
+//     },
+//     "status": "success"
+// } */}
 
-        <Table.Column
+
+        {/* <Table.Column
           dataIndex="session_date"
-          title={t("table.session")}
+          title="Сессия"
           render={(value, record: Booking) => (
             <div>
               <div>
@@ -153,44 +164,34 @@ export default function BookingsPage() {
               </div>
             </div>
           )}
-        />
+        /> */}
 
-        <Table.Column
-          dataIndex="session_trainer_name"
-          title={t("table.trainer")}
-        />
+        {/* <Table.Column dataIndex="session_trainer_name" title="Тренер" /> */}
 
         <Table.Column
           dataIndex="status"
-          title={t("table.status")}
+          title="Статус"
           render={(value) => {
             const colors: Record<string, string> = {
               confirmed: "success",
               requested: "warning",
               canceled: "error",
             };
-            return <Tag color={colors[value] || "default"}>{value}</Tag>;
+
+            const humanReadableStatus: Record<string, string> = {
+              confirmed: "Подтверждено",
+              requested: "Запрошено",
+              canceled: "Отменено",
+            };
+
+            return <Tag color={colors[value] || "default"}>{humanReadableStatus[value]}</Tag>;
           }}
         />
 
-        <Table.Column
-          dataIndex="has_ticket"
-          title={t("table.ticket")}
-          render={(value) =>
-            value ? (
-              <Tag icon={<CheckCircleOutlined />} color="success">
-                Есть
-              </Tag>
-            ) : (
-              <Tag icon={<CloseCircleOutlined />} color="error">
-                Нет
-              </Tag>
-            )
-          }
-        />
+        <Table.Column />
 
         <Table.Column
-          title={t("table.actions")}
+          title="Действия"
           render={(_, record: Booking) => (
             <Space>
               {record.status !== "canceled" && (

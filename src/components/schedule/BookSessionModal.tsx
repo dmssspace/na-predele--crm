@@ -25,7 +25,6 @@ import {
 } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
-import { useTranslations } from "next-intl";
 import type { Session, CustomerSearchResult, Ticket } from "@/types/schedule";
 import { scheduleApi } from "@/lib/api/schedule";
 
@@ -40,12 +39,12 @@ export default function BookSessionModal({
   onClose,
   onSuccess,
 }: BookSessionModalProps) {
-  const t = useTranslations("schedule.bookModal");
   const invalidate = useInvalidate();
   const [form] = Form.useForm();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchResult | null>(null);
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<CustomerSearchResult | null>(null);
   const [useTicket, setUseTicket] = useState(true);
 
   // Search customers
@@ -96,7 +95,7 @@ export default function BookSessionModal({
   const handleBookSession = async () => {
     try {
       const values = await form.validateFields();
-      
+
       const bookingData: { customer_id: string; ticket_id?: string } = {
         customer_id: values.customer_id,
       };
@@ -106,38 +105,46 @@ export default function BookSessionModal({
       }
 
       await scheduleApi.bookSession(session.id, bookingData);
-      
-      message.success(t("success"));
+
+      message.success("Тренировка успешно забронирована");
       invalidate({ resource: "sessions", invalidates: ["list"] });
       invalidate({ resource: "bookings", invalidates: ["list"] });
-      
+
       onSuccess?.();
       onClose();
     } catch (error: any) {
       // Handle known backend errors
       const errCode = error?.response?.data?.error?.code;
-      const errMsg = error?.response?.data?.error?.message || error?.response?.data?.message;
+      const errMsg =
+        error?.response?.data?.error?.message || error?.response?.data?.message;
 
-      if (errCode === "session_full" || errMsg?.toLowerCase()?.includes("full")) {
-        message.error(t("fullMessage") || "Тренировка заполнена");
-      } else if (errCode === "ticket_invalid" || errMsg?.toLowerCase()?.includes("ticket")) {
-        message.error(t("error") || "Проблема с абонементом");
+      if (
+        errCode === "session_full" ||
+        errMsg?.toLowerCase()?.includes("full")
+      ) {
+        message.error("Тренировка заполнена");
+      } else if (
+        errCode === "ticket_invalid" ||
+        errMsg?.toLowerCase()?.includes("ticket")
+      ) {
+        message.error("Проблема с абонементом");
       } else {
-        message.error(t("error"));
+        message.error("Ошибка бронирования тренировки");
       }
     }
   };
 
   const activeTickets = ticketsData?.data?.data || [];
   const isFull = session.bookings_count >= session.event.clients_cap;
-  const canBook = selectedCustomer && (!useTicket || form.getFieldValue("ticket_id"));
+  const canBook =
+    selectedCustomer && (!useTicket || form.getFieldValue("ticket_id"));
 
   return (
     <Modal
       title={
         <Space>
           <CheckCircleOutlined />
-          {t("title", { default: "Забронировать тренировку" })}
+          Забронировать тренировку
         </Space>
       }
       open={true}
@@ -165,8 +172,10 @@ export default function BookSessionModal({
           </Descriptions.Item>
           <Descriptions.Item label="Время">
             <ClockCircleOutlined />{" "}
-            {format(parseISO(session.start_at), "dd.MM.yyyy HH:mm", { locale: ru })} -{" "}
-            {format(parseISO(session.end_at), "HH:mm", { locale: ru })}
+            {format(parseISO(session.start_at), "dd.MM.yyyy HH:mm", {
+              locale: ru,
+            })}{" "}
+            - {format(parseISO(session.end_at), "HH:mm", { locale: ru })}
           </Descriptions.Item>
           <Descriptions.Item label="Тип">
             <Tag color="blue">{session.event.training_type}</Tag>
@@ -215,7 +224,9 @@ export default function BookSessionModal({
                     style={{
                       cursor: "pointer",
                       backgroundColor:
-                        selectedCustomer?.id === customer.id ? "#e6f7ff" : undefined,
+                        selectedCustomer?.id === customer.id
+                          ? "#e6f7ff"
+                          : undefined,
                       padding: 8,
                     }}
                   >
@@ -239,7 +250,10 @@ export default function BookSessionModal({
 
             {/* Ticket Selection */}
             <Form.Item label="2. Использование абонемента">
-              <Radio.Group value={useTicket} onChange={(e) => setUseTicket(e.target.value)}>
+              <Radio.Group
+                value={useTicket}
+                onChange={(e) => setUseTicket(e.target.value)}
+              >
                 <Space direction="vertical">
                   <Radio value={true}>С абонементом</Radio>
                   <Radio value={false}>Без абонемента (бесплатно)</Radio>

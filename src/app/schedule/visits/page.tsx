@@ -10,14 +10,12 @@ import { List } from "@refinedev/antd";
 import { Card, Space, Table, Tag, Statistic, Row, Col, Alert } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
-import { useTranslations } from "next-intl";
 import type { Visit } from "@/types/schedule";
 import { visitsApi } from "@/lib/api/schedule";
 import { useQuery } from "@tanstack/react-query";
 import type { TablePaginationConfig } from "antd";
 
 export default function VisitsPage() {
-  const t = useTranslations("schedule.visits");
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
@@ -117,7 +115,7 @@ export default function VisitsPage() {
       title={
         <Space>
           <HistoryOutlined />
-          {t("title", { default: "История посещений" })}
+          История посещений
         </Space>
       }
     >

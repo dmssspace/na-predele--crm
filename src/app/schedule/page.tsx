@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import React, { useState, useMemo, useRef } from "react";
+import { ClockCircleOutlined } from "@ant-design/icons";
 import { List } from "@refinedev/antd";
 import {
   Card,
@@ -16,12 +16,10 @@ import {
 } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
-import { useTranslations } from "next-intl";
 import type { ScheduleSession, Schedule } from "@/types/schedule";
 import { scheduleApi } from "@/lib/api/schedule";
 import { useQuery } from "@tanstack/react-query";
 import BookSessionModal from "@/components/schedule/BookSessionModal";
-import InstantPersonalModal from "@/components/schedule/InstantPersonalModal";
 
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -29,14 +27,14 @@ import interactionPlugin from "@fullcalendar/interaction";
 import ruLocale from "@fullcalendar/core/locales/ru";
 import type { EventClickArg, DatesSetArg } from "@fullcalendar/core";
 
-// FullCalendar стили
 import "@fullcalendar/core/index.js";
 import "@fullcalendar/daygrid/index.js";
 import "@fullcalendar/timegrid/index.js";
-import "./calendar.css";
+import { useCustom } from "@refinedev/core";
+import BookPersonalSessionModal from "@components/schedule/BookPersonalSessionModal";
 
 export default function SchedulePage() {
-  const t = useTranslations("schedule.calendar");
+  const calendarRef = useRef<FullCalendar | null>(null);
   const [selectedSession, setSelectedSession] =
     useState<ScheduleSession | null>(null);
   const [dateRange, setDateRange] = useState<{
@@ -44,7 +42,77 @@ export default function SchedulePage() {
     end: Date;
   } | null>(null);
 
-  // Fetch schedule data
+  const getCalendarWeekday = () => {
+    const calendarAPI = calendarRef.current?.getApi();
+
+    if (!calendarAPI) return null;
+
+    const currentDate = calendarAPI.getDate();
+
+    return currentDate.getDay(); // 0 (воскресенье) - 6 (суббота)
+  };
+
+  const { query: availabilityQuery } = useCustom({
+    method: "get",
+    url: "/schedule/availability",
+    config: {},
+  });
+
+  const { data: availabilityData, isLoading: isAvailabilityLoading } =
+    availabilityQuery;
+
+  const minAvailabilityHour = useMemo(() => {
+    const availability = availabilityData?.data?.data;
+
+    const parseTime = (time?: string) => {
+      if (!time) return 24 * 60;
+      const [hh, mm] = time.split(":").map(Number);
+      return hh * 60 + mm;
+    };
+
+    if (!availability || availability.length === 0) {
+      return "08:00";
+    }
+
+    let minHour = availability[0]?.start_time ?? "08:00";
+
+    availability.forEach((slot: any) => {
+      const start = slot?.start_time;
+      if (!start) return;
+      if (parseTime(start) < parseTime(minHour)) {
+        minHour = start;
+      }
+    });
+
+    return minHour;
+  }, [availabilityData]);
+
+  const maxAvailabilityHour = useMemo(() => {
+    const availability = availabilityData?.data?.data;
+
+    const parseTime = (time?: string) => {
+      if (!time) return 0;
+      const [hh, mm] = time.split(":").map(Number);
+      return hh * 60 + mm;
+    };
+
+    if (!availability || availability.length === 0) {
+      return "22:00";
+    }
+
+    let maxHour = availability[0]?.end_time ?? "22:00";
+
+    availability.forEach((slot: any) => {
+      const end = slot?.end_time;
+      if (!end) return;
+      if (parseTime(end) > parseTime(maxHour)) {
+        maxHour = end;
+      }
+    });
+
+    return maxHour;
+  }, [availabilityData]);
+
   const {
     data: scheduleResponse,
     isLoading,
@@ -62,7 +130,6 @@ export default function SchedulePage() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isInstantOpen, setIsInstantOpen] = useState(false);
 
-  // Преобразуем данные сессий в события для FullCalendar
   const calendarEvents = useMemo(() => {
     const scheduleData = scheduleResponse?.data;
     if (!scheduleData || !Array.isArray(scheduleData)) return [];
@@ -74,10 +141,15 @@ export default function SchedulePage() {
       day.sessions.forEach((session: ScheduleSession) => {
         if (!session.event) return;
 
-        // Определяем цвет по статусу
-        let backgroundColor = "#52c41a"; // green для scheduled
-        if (session.status === "canceled") backgroundColor = "#d9d9d9"; // gray
-        else if (session.status === "completed") backgroundColor = "#1890ff"; // blue
+        let backgroundColor = "#52c41a";
+
+        if (session.event.type === "once") {
+          backgroundColor = "#fa8c16";
+        }
+
+        if (session.status === "canceled" || session.status === "completed") {
+          backgroundColor = "#d9d9d9";
+        }
 
         events.push({
           id: session.id,
@@ -180,14 +252,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <List
-      title={
-        <Space>
-          <CalendarOutlined />
-          {t("title", { default: "Расписание" })}
-        </Space>
-      }
-    >
+    <List title={"Календарь клуба"}>
       {error && (
         <Alert
           message="Ошибка загрузки"
@@ -201,11 +266,12 @@ export default function SchedulePage() {
       <Card>
         <Space style={{ marginBottom: 12 }}>
           <Button type="primary" onClick={() => setIsInstantOpen(true)}>
-            {t("instantButton")}
+            {"Запись на персональную тренировку"}
           </Button>
         </Space>
-        <Spin spinning={isLoading}>
+        <Spin spinning={isLoading || isAvailabilityLoading}>
           <FullCalendar
+            ref={calendarRef}
             plugins={[timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
             headerToolbar={{
@@ -215,8 +281,8 @@ export default function SchedulePage() {
             }}
             locale={ruLocale}
             firstDay={1}
-            slotMinTime="07:00:00"
-            slotMaxTime="23:00:00"
+            slotMinTime={minAvailabilityHour}
+            slotMaxTime={maxAvailabilityHour}
             allDaySlot={false}
             height="auto"
             events={calendarEvents}
@@ -244,7 +310,6 @@ export default function SchedulePage() {
         </Spin>
       </Card>
 
-      {/* Session Details Modal */}
       <Modal
         title={
           <Space>
@@ -263,8 +328,8 @@ export default function SchedulePage() {
             type="primary"
             disabled={
               !selectedSession ||
-              (((selectedSession as any)?.bookings_count ?? 0) >=
-                (selectedSession?.event?.clients_cap ?? 0))
+              ((selectedSession as any)?.bookings_count ?? 0) >=
+                (selectedSession?.event?.clients_cap ?? 0)
             }
             onClick={() => setIsBookingOpen(true)}
           >
@@ -347,15 +412,15 @@ export default function SchedulePage() {
         />
       )}
 
-      {isInstantOpen && (
-        <InstantPersonalModal
-          onClose={() => setIsInstantOpen(false)}
-          onSuccess={() => {
-            setIsInstantOpen(false);
-            refetch();
-          }}
-        />
-      )}
+      <BookPersonalSessionModal
+        open={isInstantOpen}
+        availability={availabilityData?.data?.data || []}
+        onClose={() => setIsInstantOpen(false)}
+        onSuccess={() => {
+          setIsInstantOpen(false);
+          refetch();
+        }}
+      />
     </List>
   );
 }

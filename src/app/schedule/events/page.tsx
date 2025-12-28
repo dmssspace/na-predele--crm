@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
@@ -9,38 +9,29 @@ import {
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { CreateButton, List, useTable } from "@refinedev/antd";
-import { useNavigation, useParsed, useGo } from "@refinedev/core";
-import { Button, Card, Col, Row, Select, Space, Table, Tag, Form } from "antd";
-import { useTranslations } from "next-intl";
+import { CreateButton, DateField, List, useTable } from "@refinedev/antd";
+import { Button, Space, Table, Tag } from "antd";
 import type { Event } from "@/types/schedule";
+import { RecurringCreateDrawer } from "@/components/schedule/RecurringCreateDrawer";
 
 export default function EventsPage() {
-  const t = useTranslations("schedule.events");
-  const { create } = useNavigation();
-  const go = useGo();
-  const [form] = Form.useForm();
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
-  const { tableProps, searchFormProps } = useTable<Event>({
-    resource: "events",
+  const { tableProps } = useTable<Event>({
+    resource: "schedule/events",
     syncWithLocation: true,
-    onSearch: (values: any) => {
-      const filters: any[] = [];
-
-      if (values.event_type) {
-        filters.push({
-          field: "event_type",
-          operator: "eq" as const,
-          value: values.event_type,
-        });
-      }
-
-      return filters;
-    },
   });
 
   const getWeekdayName = (weekday: number) => {
-    const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
+    const days = [
+      "Понедельник",
+      "Вторник",
+      "Среда",
+      "Четверг",
+      "Пятница",
+      "Суббота",
+      "Воскресенье",
+    ];
     return days[weekday];
   };
 
@@ -57,112 +48,144 @@ export default function EventsPage() {
     }
   };
 
+  const humanizeTrainingSpec = (spec: string) => {
+    switch (spec) {
+      case "box":
+        return "Бокс";
+      case "thai":
+        return "Тайский бокс";
+      case "kickboxing":
+        return "Кикбоксинг";
+      case "mma":
+        return "ММА";
+      case "women_martial_arts":
+        return "Женские единоборства";
+      default:
+        return "-";
+    }
+  };
+
+  const humanizeTrainingType = (type: string) => {
+    switch (type) {
+      case "individual":
+        return "Индивидуальная";
+      case "group_adult":
+        return "Групповая взрослые";
+      case "group_child":
+        return "Групповая детская";
+      default:
+        return "-";
+    }
+  };
+
   return (
     <List
       title={
         <Space>
           <CalendarOutlined />
-          {t("title", { default: "События расписания" })}
+          {"События"}
         </Space>
       }
       headerButtons={() => (
         <>
           <CreateButton
             icon={<PlusOutlined />}
-            onClick={() => go({ to: "/schedule/events/create/recurring" })}
+            onClick={() => setDrawerVisible(true)}
           >
             Создать регулярную тренировку
           </CreateButton>
 
-          <CreateButton
-            style={{ marginLeft: 12 }}
-            icon={<PlusOutlined />}
-            onClick={() => go({ to: "/schedule/events/create/once" })}
-          >
-            Создать разовое занятие
-          </CreateButton>
+          <RecurringCreateDrawer
+            drawerProps={{
+              visible: Boolean(drawerVisible),
+              onClose: () => setDrawerVisible(false),
+            }}
+          />
         </>
       )}
     >
-      <Form {...searchFormProps} form={form} layout="inline" style={{ marginBottom: 16 }}>
-        <Form.Item name="event_type">
-          <Select
-            allowClear
-            placeholder={t("filters.eventType")}
-            style={{ width: 200 }}
-          >
-            <Select.Option value="recurring">Регулярные</Select.Option>
-            <Select.Option value="once">Разовые</Select.Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item>
-          <Button htmlType="submit" type="primary">
-            Фильтр
-          </Button>
-        </Form.Item>
-      </Form>
-
       <Table {...tableProps} rowKey="id">
         <Table.Column
-          dataIndex="event_type"
-          title={t("table.type")}
-          render={(value) => (
-            <Tag color={value === "recurring" ? "blue" : "cyan"}>
-              {value === "recurring" ? "Регулярное" : "Разовое"}
-            </Tag>
-          )}
+          dataIndex="type"
+          title="Тип"
+          render={(value) => {
+            return (
+              <Tag color={value === "recurring" ? "blue" : "cyan"}>
+                {value === "recurring" ? "Регулярное" : "Разовое"}
+              </Tag>
+            );
+          }}
         />
 
         <Table.Column
           dataIndex="training_type"
-          title={t("table.trainingType")}
+          title="Тип тренировки"
           render={(value) => (
             <Tag color={getTrainingTypeColor(value)}>
-              {value === "individual"
-                ? "Индивидуальная"
-                : value === "group_adult"
-                ? "Групповая взрослых"
-                : "Групповая детская"}
+              {humanizeTrainingType(value)}
             </Tag>
           )}
         />
 
         <Table.Column
           dataIndex="training_spec"
-          title={t("table.specialization")}
-          render={(value) => <span style={{ textTransform: "uppercase" }}>{value}</span>}
+          title="Специализация"
+          render={(value) => (
+            <span style={{ textTransform: "uppercase" }}>
+              {humanizeTrainingSpec(value)}
+            </span>
+          )}
         />
 
         <Table.Column
-          title={t("table.trainer")}
+          title="Тренер"
           render={(_, record: Event) => (
             <Space>
               <UserOutlined />
-              {record.trainer.full_name}
+              <span>{record.trainer.short_name}</span>
             </Space>
           )}
         />
 
         <Table.Column
-          title={t("table.schedule")}
+          title="Расписание"
           render={(_, record: Event) => (
             <Space direction="vertical" size={0}>
-              {record.event_type === "recurring" && record.weekday !== undefined && (
-                <div>
-                  <CalendarOutlined /> {getWeekdayName(record.weekday)}
-                </div>
+              {record.type === "recurring" && record.weekday !== undefined && (
+                <Space>
+                  <CalendarOutlined />
+                  <span>{getWeekdayName(record.weekday)}</span>
+                </Space>
               )}
-              <div>
-                <ClockCircleOutlined /> {record.start_time} - {record.end_time}
-              </div>
+              <Space>
+                <ClockCircleOutlined />
+                {record.type === "recurring" ? (
+                  <>
+                    {record.start_time}
+                    {" - "}
+                    {record.end_time}
+                  </>
+                ) : (
+                  <>
+                    <DateField
+                      format="DD.MM.YYYY HH:mm"
+                      value={record.start_at}
+                    />
+                    {" - "}
+                    <DateField
+                      format="DD.MM.YYYY HH:mm"
+                      value={record.end_at}
+                    />
+                  </>
+                )}
+              </Space>
             </Space>
           )}
         />
 
         <Table.Column
           dataIndex="clients_cap"
-          title={t("table.capacity")}
+          title="Вместимость"
           render={(value) => (
             <Tag icon={<TeamOutlined />} color="purple">
               {value}
@@ -171,7 +194,7 @@ export default function EventsPage() {
         />
 
         <Table.Column
-          title={t("table.actions")}
+          title="Действия"
           render={(_, record: Event) => (
             <Button danger size="small" icon={<DeleteOutlined />}>
               Удалить

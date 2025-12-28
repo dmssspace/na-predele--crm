@@ -150,14 +150,12 @@ export interface ApiCustomerSearchResponse {
   data: CustomerSearchResult[];
 }
 
-// Create visit request
 export interface CreateVisitRequest {
   customer_id: string;
   ticket_id?: string;
   is_charged: boolean;
 }
 
-// Generic API Response
 export interface ApiResponse<T = any> {
   status?: string;
   success?: boolean;
@@ -171,16 +169,19 @@ export interface ApiResponse<T = any> {
       };
 }
 
-// Legacy interfaces для обратной совместимости
 export interface Event {
   id: string;
-  event_type: EventType;
+  type: EventType;
   training_type: TrainingType;
   training_spec: TrainingSpec;
   clients_cap: number;
+  start_at?: string;
+  end_at?: string;
   weekday?: Weekday;
   start_time?: string;
   end_time?: string;
+  created_at?: string;
+  updated_at?: string;
   trainer: Trainer;
 }
 
