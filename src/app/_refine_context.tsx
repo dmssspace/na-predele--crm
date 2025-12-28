@@ -143,16 +143,6 @@ export const RefineContext = ({
                 },
               },
               {
-                name: "schedule/quick-visit",
-                list: "/schedule/quick-visit",
-                meta: {
-                  canDelete: false,
-                  parent: "schedule",
-                  label: "Регистрация визита",
-                  icon: <ClockCircleOutlined />,
-                },
-              },
-              {
                 name: "schedule/bookings",
                 list: "/schedule/bookings",
                 meta: {

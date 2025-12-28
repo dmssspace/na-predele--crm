@@ -1,19 +1,9 @@
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import { ClockCircleOutlined } from "@ant-design/icons";
 import { List } from "@refinedev/antd";
-import {
-  Card,
-  Badge,
-  Space,
-  Button,
-  Modal,
-  Descriptions,
-  Tag,
-  Spin,
-  Alert,
-} from "antd";
+import SessionDetailsDrawer from "@/components/schedule/SessionDetailsDrawer";
+import { Card, Badge, Space, Button, Tag, Spin, Alert } from "antd";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import type { ScheduleSession, Schedule } from "@/types/schedule";
@@ -310,95 +300,12 @@ export default function SchedulePage() {
         </Spin>
       </Card>
 
-      <Modal
-        title={
-          <Space>
-            <ClockCircleOutlined />
-            Детали тренировки
-          </Space>
-        }
+      <SessionDetailsDrawer
+        session={selectedSession}
         open={!!selectedSession}
-        onCancel={() => setSelectedSession(null)}
-        footer={[
-          <Button key="cancel" onClick={() => setSelectedSession(null)}>
-            Закрыть
-          </Button>,
-          <Button
-            key="book"
-            type="primary"
-            disabled={
-              !selectedSession ||
-              ((selectedSession as any)?.bookings_count ?? 0) >=
-                (selectedSession?.event?.clients_cap ?? 0)
-            }
-            onClick={() => setIsBookingOpen(true)}
-          >
-            Забронировать
-          </Button>,
-        ]}
-        width={700}
-      >
-        {selectedSession && selectedSession.event && (
-          <>
-            <Descriptions column={2} bordered>
-              <Descriptions.Item label="Тренер">
-                {selectedSession.event.trainer?.full_name || "Не указан"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Время">
-                {format(parseISO(selectedSession.start_at), "HH:mm", {
-                  locale: ru,
-                })}{" "}
-                -{" "}
-                {format(parseISO(selectedSession.end_at), "HH:mm", {
-                  locale: ru,
-                })}
-              </Descriptions.Item>
-              <Descriptions.Item label="Тип тренировки">
-                <Tag
-                  color={getTrainingTypeColor(
-                    selectedSession.event.training_type
-                  )}
-                >
-                  {humanizeTrainingType(selectedSession.event.training_type)}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Специализация">
-                {humanizeTrainingSpec(selectedSession.event.training_spec)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Вместимость">
-                <Badge
-                  status="success"
-                  text={`${selectedSession.event.clients_cap} мест`}
-                />
-              </Descriptions.Item>
-              <Descriptions.Item label="Статус">
-                <Tag color={getSessionStatusColor(selectedSession.status)}>
-                  {humanizeSessionStatus(selectedSession.status)}
-                </Tag>
-              </Descriptions.Item>
-            </Descriptions>
-
-            <Card title="Информация" style={{ marginTop: 16 }} size="small">
-              <p>
-                <strong>Дата:</strong>{" "}
-                {format(parseISO(selectedSession.start_at), "dd MMMM yyyy", {
-                  locale: ru,
-                })}
-              </p>
-              {selectedSession.event.type === "recurring" && (
-                <p>
-                  <Tag color="blue">Регулярная тренировка</Tag>
-                </p>
-              )}
-              {selectedSession.event.type === "once" && (
-                <p>
-                  <Tag color="orange">Разовая тренировка</Tag>
-                </p>
-              )}
-            </Card>
-          </>
-        )}
-      </Modal>
+        onClose={() => setSelectedSession(null)}
+        onBook={() => setIsBookingOpen(true)}
+      />
 
       {isBookingOpen && selectedSession && (
         <BookSessionModal

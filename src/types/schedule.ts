@@ -9,7 +9,7 @@ export type TrainingSpec =
 
 export type SessionStatus = "scheduled" | "canceled" | "completed";
 
-export type BookingStatus = "requested" | "confirmed" | "canceled";
+export type BookingStatus = "requested" | "confirmed" | "canceled" | "visited";
 
 export type EventType = "recurring" | "once";
 
@@ -107,24 +107,30 @@ export interface ApiVisitsResponse {
 // Ticket (абонемент)
 export interface TicketPlan {
   id: string;
-  title: string;
-  description?: string;
+  name: string;
+  type: string;
+  metadata?: Record<string, any>;
+}
+
+export interface TicketPlanPackage {
+  id: string;
+  duration_days: number;
+  total_sessions: number;
   price: number;
-  visits_count: number;
-  validity_days: number;
+  is_active: boolean;
+  plan: TicketPlan;
 }
 
 export interface CustomerTicket {
   id: string;
-  customer_id: string;
-  plan_id: string;
+  ticket_id: string;
   start_date: string;
   end_date: string;
-  remaining_visits: number;
-  status: string; // "active" | "expired" | "used"
+  remaining_sessions: number;
+  status: string;
   created_at: string;
   updated_at?: string;
-  plan?: TicketPlan;
+  package?: TicketPlanPackage;
 }
 
 // API Response для абонементов
@@ -304,6 +310,19 @@ export interface SessionWithDetails extends Session {
   capacity_percentage: number;
   is_full: boolean;
   available_spots: number;
+}
+
+// Booking response returned by GET /schedule/sessions/:id/bookings
+export interface BookingResponse {
+  id: string;
+  session_id: string;
+  customer_id: string;
+  status: BookingStatus;
+  canceled_by?: string | null;
+  created_at: string;
+  updated_at?: string;
+  customer?: import("./user").Customer | null;
+  session?: ScheduleSession | null;
 }
 
 export interface CustomerSearchResult {

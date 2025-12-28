@@ -19,7 +19,6 @@ import type {
 // Create instant (staff-only) event
 // POST /schedule/events/instant
 
-
 const api = axios.create({
   baseURL: `${API_URL}`,
   headers: {
@@ -87,8 +86,14 @@ export const scheduleApi = {
 
   // Register visit by booking id
   // POST /schedule/bookings/:id/visit
-  registerVisitFromBooking: async (bookingId: string): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>(`/schedule/bookings/${bookingId}/visit`);
+  registerVisitFromBooking: async (
+    bookingId: string,
+    data?: { ticket_id?: string | null; is_charged?: boolean }
+  ): Promise<ApiResponse> => {
+    const response = await api.post<ApiResponse>(
+      `/schedule/bookings/${bookingId}/visit`,
+      data
+    );
     return response.data;
   },
 
@@ -98,7 +103,21 @@ export const scheduleApi = {
     bookingId: string,
     data: CancelBookingRequest
   ): Promise<ApiResponse> => {
-    const response = await api.post<ApiResponse>(`/schedule/bookings/${bookingId}/cancel`, data);
+    const response = await api.post<ApiResponse>(
+      `/schedule/bookings/${bookingId}/cancel`,
+      data
+    );
+    return response.data;
+  },
+
+  // Get bookings for a session
+  // GET /schedule/sessions/:id/bookings
+  getSessionBookings: async (
+    sessionId: string
+  ): Promise<ApiResponse<import("@/types/schedule").BookingResponse[]>> => {
+    const response = await api.get<
+      ApiResponse<import("@/types/schedule").BookingResponse[]>
+    >(`/schedule/sessions/${sessionId}/bookings`);
     return response.data;
   },
 };
