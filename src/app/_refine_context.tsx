@@ -20,6 +20,7 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   FileImageOutlined,
+  HomeOutlined,
   IdcardOutlined,
   PhoneOutlined,
   ReadOutlined,
@@ -29,6 +30,7 @@ import {
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { accessControlProvider } from "@providers/auth-provider/access-control-provider";
 
 type Props = {
   themeMode?: string;
@@ -80,6 +82,7 @@ export const RefineContext = ({
             dataProvider={dataProvider}
             notificationProvider={useNotificationProvider}
             authProvider={authProviderClient}
+            accessControlProvider={accessControlProvider}
             resources={[
               {
                 name: "dashboard",
@@ -87,7 +90,7 @@ export const RefineContext = ({
                 meta: {
                   canDelete: false,
                   label: "Главная",
-                  icon: <SettingOutlined />,
+                  icon: <HomeOutlined />,
                 },
               },
               {
