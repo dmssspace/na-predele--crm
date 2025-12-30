@@ -5,25 +5,21 @@ import {
   BookOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { List, useTable } from "@refinedev/antd";
 import { useInvalidate, useNotification } from "@refinedev/core";
 import { Button, DatePicker, Form, Select, Space, Table, Tag } from "antd";
-import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
-import type { Booking } from "@/types/schedule";
+import type { ScheduleBooking } from "@/types/schedule";
 import { scheduleApi } from "@/lib/api/schedule";
 
 const { RangePicker } = DatePicker;
-
 
 export default function BookingsPage() {
   const invalidate = useInvalidate();
   const { open } = useNotification();
   const [form] = Form.useForm();
 
-  const { tableProps, searchFormProps, filters } = useTable<Booking>({
+  const { tableProps, searchFormProps, filters } = useTable<ScheduleBooking>({
     resource: "schedule/bookings",
     syncWithLocation: true,
     onSearch: (values: any) => {
@@ -124,50 +120,6 @@ export default function BookingsPage() {
       </Form>
 
       <Table {...tableProps} rowKey="id">
-{/* //
-//     "data": [
-//         {
-//             "id": "49a281fe-a233-4461-ad06-05222bcbd113",
-//             "session_id": "0cc82c7a-e910-4650-a745-3cdd5df50207",
-//             "customer_id": "cc229bea-ab73-4da3-8c6a-b75eadfa50bf",
-//             "status": "confirmed",
-//             "created_at": "2025-12-26T21:39:46.192068Z",
-//             "updated_at": "2025-12-26T21:39:46.192068Z",
-//             "session": {
-//                 "id": "0cc82c7a-e910-4650-a745-3cdd5df50207",
-//                 "start_at": "2025-12-28T10:45:00Z",
-//                 "end_at": "2025-12-28T11:45:00Z",
-//                 "status": "scheduled"
-//             }
-//         }
-//     ],
-//     "pagination": {
-//         "total": 1,
-//         "per_page": 10,
-//         "page": 1,
-//         "last_page": 1
-//     },
-//     "status": "success"
-// } */}
-
-
-        {/* <Table.Column
-          dataIndex="session_date"
-          title="Сессия"
-          render={(value, record: Booking) => (
-            <div>
-              <div>
-                {format(parseISO(value), "dd.MM.yyyy HH:mm", { locale: ru })}
-              </div>
-              <div style={{ fontSize: 12, color: "#888" }}>
-                {record.session_training_spec}
-              </div>
-            </div>
-          )}
-        /> */}
-
-        {/* <Table.Column dataIndex="session_trainer_name" title="Тренер" /> */}
-
         <Table.Column
           dataIndex="status"
           title="Статус"
@@ -184,7 +136,11 @@ export default function BookingsPage() {
               canceled: "Отменено",
             };
 
-            return <Tag color={colors[value] || "default"}>{humanReadableStatus[value]}</Tag>;
+            return (
+              <Tag color={colors[value] || "default"}>
+                {humanReadableStatus[value]}
+              </Tag>
+            );
           }}
         />
 
@@ -192,7 +148,7 @@ export default function BookingsPage() {
 
         <Table.Column
           title="Действия"
-          render={(_, record: Booking) => (
+          render={(_, record: ScheduleBooking) => (
             <Space>
               {record.status !== "canceled" && (
                 <>

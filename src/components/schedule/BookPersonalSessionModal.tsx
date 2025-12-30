@@ -1,32 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  CheckCircleOutlined,
-  SearchOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import React, { useState } from "react";
+import { CheckCircleOutlined } from "@ant-design/icons";
 import {
   Modal,
   Form,
-  Input,
   Button,
   Space,
   Select,
   DatePicker,
-  Switch,
   Card,
-  List,
   Alert,
-  message,
 } from "antd";
 import dayjs from "dayjs";
-import type {
-  CustomerSearchResult,
-  Ticket,
-  Availability,
-} from "@/types/schedule";
-import { scheduleApi, customersApi, ticketsApi } from "@/lib/api/schedule";
+import type { ScheduleAvailability } from "@/types/schedule";
+import { scheduleApi } from "@/lib/api/schedule";
 import { useSelect } from "@refinedev/antd";
 import { useInvalidate, useNotification } from "@refinedev/core";
 import { useRouter } from "next/navigation";
@@ -35,7 +23,7 @@ interface BookPersonalSessionModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  availability?: Availability[]; // array of weekday availabilities
+  availability?: ScheduleAvailability[]; // array of weekday availabilities
 }
 
 export default function BookPersonalSessionModal({

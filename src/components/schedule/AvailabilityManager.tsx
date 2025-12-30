@@ -4,7 +4,7 @@ import { EditOutlined, SaveOutlined, CloseOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { scheduleApi } from "@/lib/api/schedule";
 import type {
-  Availability,
+  ScheduleAvailability,
   UpdateWeekdayAvailabilityRequest,
 } from "@/types/schedule";
 import dayjs from "dayjs";
@@ -19,7 +19,7 @@ const weekdayNames = [
   "Суббота",
 ];
 
-interface EditableAvailability extends Availability {
+interface EditableAvailability extends ScheduleAvailability {
   editing?: boolean;
 }
 
@@ -54,7 +54,7 @@ export default function AvailabilityManager() {
 
   const availability = availabilityResponse?.data || [];
 
-  const handleEdit = (record: Availability) => {
+  const handleEdit = (record: ScheduleAvailability) => {
     setEditingRow(record.weekday);
     setEditedData({
       weekday: record.weekday,
@@ -102,7 +102,7 @@ export default function AvailabilityManager() {
       title: "Время начала",
       dataIndex: "start_time",
       key: "start_time",
-      render: (start_time: string, record: Availability) => {
+      render: (start_time: string, record: ScheduleAvailability) => {
         if (editingRow === record.weekday) {
           return (
             <TimePicker
@@ -120,7 +120,7 @@ export default function AvailabilityManager() {
       title: "Время окончания",
       dataIndex: "end_time",
       key: "end_time",
-      render: (end_time: string, record: Availability) => {
+      render: (end_time: string, record: ScheduleAvailability) => {
         if (editingRow === record.weekday) {
           return (
             <TimePicker
@@ -137,7 +137,7 @@ export default function AvailabilityManager() {
     {
       title: "Действия",
       key: "actions",
-      render: (_: any, record: Availability) => {
+      render: (_: any, record: ScheduleAvailability) => {
         if (editingRow === record.weekday) {
           return (
             <Space>
@@ -178,7 +178,9 @@ export default function AvailabilityManager() {
   const fullAvailability: EditableAvailability[] = [];
 
   for (let i = 0; i < 7; i++) {
-    const existing = availability.find((a) => a.weekday === i);
+    const existing = availability.find(
+      (a: ScheduleAvailability) => a.weekday === i
+    );
 
     fullAvailability.push({
       weekday: i as any,

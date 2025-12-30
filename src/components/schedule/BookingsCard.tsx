@@ -19,9 +19,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { scheduleApi } from "@/lib/api/schedule";
 import CreateBookingModal from "@/components/schedule/CreateBookingModal";
 import RegisterVisitModal from "@/components/schedule/RegisterVisitModal";
-import type { BookingResponse } from "@/types/schedule";
-import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
+import type { ScheduleBooking } from "@/types/schedule";
+import dayjs from "dayjs";
 
 const { Text } = Typography;
 
@@ -33,12 +32,12 @@ export default function BookingsCard({ sessionId }: Props) {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const { data, isLoading, error } = useQuery<
-    import("@/types/schedule").ApiResponse<BookingResponse[]>,
-    Error
-  >({
+  const { data, isLoading, error } = useQuery<ScheduleBooking[], Error>({
     queryKey: ["sessionBookings", sessionId],
-    queryFn: () => scheduleApi.getSessionBookings(sessionId!),
+    queryFn: async () => {
+      const response = await scheduleApi.getSessionBookings(sessionId!);
+      return response.data ?? [];
+    },
     enabled: !!sessionId,
   });
 
@@ -64,7 +63,7 @@ export default function BookingsCard({ sessionId }: Props) {
     },
   });
 
-  const bookings: BookingResponse[] = data?.data ?? [];
+  const bookings: ScheduleBooking[] = data ?? [];
 
   if (!sessionId) return null;
 
@@ -179,11 +178,7 @@ export default function BookingsCard({ sessionId }: Props) {
                       </Tag>
                     </Space>
                   }
-                  description={format(
-                    parseISO(b.created_at),
-                    "dd MMM yyyy HH:mm",
-                    { locale: ru }
-                  )}
+                  description={dayjs(b.created_at).format("DD.MM.YYYY HH:mm")}
                 />
               </List.Item>
             )}
@@ -196,7 +191,6 @@ export default function BookingsCard({ sessionId }: Props) {
         open={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         onSuccess={() => {
-          // ensure bookings list refreshes
           queryClient.invalidateQueries({
             queryKey: ["sessionBookings", sessionId],
           });

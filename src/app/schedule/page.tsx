@@ -3,9 +3,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import { List } from "@refinedev/antd";
 import SessionDetailsDrawer from "@/components/schedule/SessionDetailsDrawer";
-import { Card, Badge, Space, Button, Tag, Spin, Alert } from "antd";
-import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
+import { Card, Space, Button, Spin, Alert } from "antd";
 import type { ScheduleSession, Schedule } from "@/types/schedule";
 import { scheduleApi } from "@/lib/api/schedule";
 import { useQuery } from "@tanstack/react-query";

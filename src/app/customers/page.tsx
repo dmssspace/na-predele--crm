@@ -11,13 +11,13 @@ import {
 } from "@refinedev/antd";
 import { type BaseRecord } from "@refinedev/core";
 import { Button, Space, Table } from "antd";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 import {
   CustomerEditDrawer,
   CustomerCreateDrawer,
 } from "@/components/customers";
 import { Avatar } from "@/components/avatar";
+import type { Customer } from "@/types/customer";
+import dayjs from "dayjs";
 
 export default function CustomersList() {
   const { result, tableProps } = useTable<Customer>({
@@ -173,7 +173,7 @@ export default function CustomersList() {
                 return "-";
               }
 
-              return format(date, "dd.MM.yyyy", { locale: ru });
+              return dayjs(date).format("DD.MM.YYYY");
             }}
           />
           <Table.Column

@@ -11,13 +11,13 @@ import {
 } from "@ant-design/icons";
 import { CreateButton, DateField, List, useTable } from "@refinedev/antd";
 import { Button, Space, Table, Tag } from "antd";
-import type { Event } from "@/types/schedule";
+import type { ScheduleEvent } from "@/types/schedule";
 import { RecurringCreateDrawer } from "@/components/schedule/RecurringCreateDrawer";
 
 export default function EventsPage() {
   const [drawerVisible, setDrawerVisible] = useState(false);
 
-  const { tableProps } = useTable<Event>({
+  const { tableProps } = useTable<ScheduleEvent>({
     resource: "schedule/events",
     syncWithLocation: true,
   });
@@ -139,17 +139,17 @@ export default function EventsPage() {
 
         <Table.Column
           title="Тренер"
-          render={(_, record: Event) => (
+          render={(_, record: ScheduleEvent) => (
             <Space>
               <UserOutlined />
-              <span>{record.trainer.short_name}</span>
+              <span>{record.trainer?.short_name}</span>
             </Space>
           )}
         />
 
         <Table.Column
           title="Расписание"
-          render={(_, record: Event) => (
+          render={(_, record: ScheduleEvent) => (
             <Space direction="vertical" size={0}>
               {record.type === "recurring" && record.weekday !== undefined && (
                 <Space>

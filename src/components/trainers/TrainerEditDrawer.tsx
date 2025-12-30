@@ -25,14 +25,11 @@ import {
   Modal,
   Select,
   Spin,
-  Tag,
   Typography,
   message,
   Button,
   Space,
 } from "antd";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
@@ -511,12 +508,8 @@ export const TrainerEditDrawer = ({
                 displayValue={
                   <Text>
                     {editQuery?.data?.data?.birth_date
-                      ? format(
-                          new Date(editQuery.data.data.birth_date),
-                          "dd.MM.yyyy",
-                          {
-                            locale: ru,
-                          }
+                      ? dayjs(editQuery.data.data.birth_date).format(
+                          "DD.MM.YYYY"
                         )
                       : "-"}
                   </Text>
@@ -616,12 +609,8 @@ export const TrainerEditDrawer = ({
               displayValue={
                 <Text>
                   {editQuery?.data?.data?.training_exp_start_on
-                    ? format(
-                        new Date(editQuery.data.data.training_exp_start_on),
-                        "dd.MM.yyyy",
-                        {
-                          locale: ru,
-                        }
+                    ? dayjs(editQuery.data.data.training_exp_start_on).format(
+                        "DD.MM.YYYY"
                       )
                     : "-"}
                 </Text>

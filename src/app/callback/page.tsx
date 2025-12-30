@@ -1,16 +1,16 @@
 "use client";
 
-import { DateField, List, useTable } from "@refinedev/antd";
+import { useState } from "react";
+import dayjs from "dayjs";
 import {
-  type BaseRecord,
   useNavigation,
   useCustomMutation,
   useInvalidate,
-  useList,
   useOne,
   useGetIdentity,
   useCustom,
 } from "@refinedev/core";
+import { DateField, List, useTable } from "@refinedev/antd";
 import {
   Button,
   Card,
@@ -29,50 +29,25 @@ import {
   EditOutlined,
   CopyOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
-import dayjs from "dayjs";
+
+import {
+  humanizeCallbackStatus,
+  type CallbackRequest as Callback,
+} from "@/types/callback";
+import type { Me } from "@/types/auth";
+import { Trainer } from "@/types/trainer";
+import { TicketPlan } from "@/types/ticket";
 
 const { Text } = Typography;
-
-interface Callback extends BaseRecord {
-  id: string;
-  user_full_name: string;
-  user_phone_number: string;
-  user_email: string;
-  type: string;
-  status: string;
-  comment?: string;
-  metadata: CallbackMetadata;
-  created_at: string;
-  updated_at: string;
-  assignee_user?: AssigneeUser;
-}
-
-interface AssigneeUser {
-  id: string;
-  email: string;
-  phone_number?: string;
-  role: string;
-}
-
-interface CallbackMetadata {
-  trainer_id?: string;
-  ticket_plan_id?: string;
-  duration_days?: number;
-}
 
 export default function CallbackRequestList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(
     null
   );
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState<string>("");
 
-  const { data: identity } = useGetIdentity<{
-    id: string;
-    email: string;
-    role: string;
-  }>();
+  const { data: identity } = useGetIdentity<Me>();
 
   const { tableProps } = useTable<Callback>({
     syncWithLocation: true,
@@ -83,19 +58,6 @@ export default function CallbackRequestList() {
   const invalidate = useInvalidate();
   const { mutate: assignCallback } = useCustomMutation();
   const { mutate: solveCallback } = useCustomMutation();
-
-  const humanizeCallbackStatus = (status: string) => {
-    switch (status) {
-      case "new":
-        return "Новая";
-      case "processing":
-        return "В обработке";
-      case "completed":
-        return "Обработана";
-      default:
-        return status;
-    }
-  };
 
   const handleAssign = (id: string) => {
     assignCallback(
@@ -297,7 +259,7 @@ export default function CallbackRequestList() {
   };
 
   const TrainerInfo = ({ trainerID }: { trainerID: string }) => {
-    const { query } = useOne({
+    const { query } = useOne<Trainer>({
       resource: "trainers",
       id: trainerID,
     });
@@ -332,7 +294,7 @@ export default function CallbackRequestList() {
   };
 
   const TicketPlanInfo = ({ planID }: { planID: string }) => {
-    const { query } = useOne({
+    const { query } = useOne<TicketPlan>({
       resource: "tickets/plans",
       id: planID,
     });
@@ -376,7 +338,7 @@ export default function CallbackRequestList() {
                 {record.type === "trainer_signup" && (
                   <>
                     <Text type="secondary">Тренер</Text>
-                    {record.metadata.trainer_id ? (
+                    {record.metadata?.trainer_id ? (
                       <TrainerInfo trainerID={record.metadata.trainer_id} />
                     ) : (
                       <Text>-</Text>
@@ -386,7 +348,7 @@ export default function CallbackRequestList() {
                 {record.type === "ticket_request" && (
                   <>
                     <Text type="secondary">Тариф абонемента</Text>
-                    {record.metadata.ticket_plan_id ? (
+                    {record.metadata?.ticket_plan_id ? (
                       <TicketPlanInfo planID={record.metadata.ticket_plan_id} />
                     ) : (
                       <Text>-</Text>
@@ -400,7 +362,7 @@ export default function CallbackRequestList() {
                       }}
                     >
                       <Text strong style={{ fontSize: 18 }}>
-                        {record.metadata.duration_days
+                        {record.metadata?.duration_days
                           ? record.metadata.duration_days + " дней"
                           : "-"}
                       </Text>
@@ -642,7 +604,7 @@ export default function CallbackRequestList() {
           render={(date: string) => (
             <DateField value={date} format="DD.MM.YYYY HH:mm" />
           )}
-        />{" "}
+        />
         <Table.Column
           title="Действия"
           dataIndex="actions"

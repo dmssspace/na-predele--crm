@@ -1,11 +1,9 @@
 "use client";
 
-import { use } from "react";
 import { Create, useForm } from "@refinedev/antd";
 import { Form, Input } from "antd";
 
-export default function CategoryCreate({ params }) {
-  const p = use(params);
+export default function CategoryCreate() {
   const { formProps, saveButtonProps } = useForm({});
 
   return (

@@ -4,7 +4,6 @@ import { humanizeBlogCategoryTitle } from "@lib/format/humanize";
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select } from "antd";
-import { MediaUploader } from "@components/media/MediaUploader";
 import { MediaSelector } from "@components/media/MediaSelector";
 
 export default function BlogPostCreate() {
@@ -97,7 +96,9 @@ export default function BlogPostCreate() {
           <Form.Item
             label={"Галерея изображений"}
             name={"gallery_media_ids"}
-            rules={[{ required: true, message: "Выберите хотя бы одно изображение" }]}
+            rules={[
+              { required: true, message: "Выберите хотя бы одно изображение" },
+            ]}
           >
             <MediaSelector
               multiple={true}

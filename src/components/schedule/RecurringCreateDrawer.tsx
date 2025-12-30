@@ -18,7 +18,7 @@ import { useInvalidate } from "@refinedev/core";
 import { useQuery } from "@tanstack/react-query";
 import { scheduleApi } from "@/lib/api/schedule";
 import dayjs from "dayjs";
-import { Trainer } from "@types/user";
+import { Trainer } from "@/types/trainer";
 
 const { Title } = Typography;
 

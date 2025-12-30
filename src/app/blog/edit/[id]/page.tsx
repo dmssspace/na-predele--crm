@@ -6,9 +6,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { Form, Input, Select } from "antd";
 
 export default function BlogPostEdit() {
-  const { formProps, saveButtonProps, query } = useForm({});
-
-  const blogPostsData = query?.data?.data;
+  const { formProps, saveButtonProps } = useForm({});
 
   const handleFinish = (values: any) => {
     const transformedValues = {

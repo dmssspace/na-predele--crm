@@ -8,12 +8,11 @@ import {
 } from "@ant-design/icons";
 import { List } from "@refinedev/antd";
 import { Card, Space, Table, Tag, Statistic, Row, Col, Alert } from "antd";
-import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
-import type { Visit } from "@/types/schedule";
+import type { ScheduleVisit } from "@/types/schedule";
 import { visitsApi } from "@/lib/api/schedule";
 import { useQuery } from "@tanstack/react-query";
 import type { TablePaginationConfig } from "antd";
+import dayjs from "dayjs";
 
 export default function VisitsPage() {
   const [pagination, setPagination] = useState({
@@ -33,7 +32,7 @@ export default function VisitsPage() {
 
   const visits = visitsResponse?.data || [];
   const totalVisits = visits.length;
-  const totalCharged = visits.filter((v) => v.is_charged).length;
+  const totalCharged = visits.filter((v: ScheduleVisit) => v.is_charged).length;
   const totalFree = totalVisits - totalCharged;
 
   const handleTableChange = (newPagination: TablePaginationConfig) => {
@@ -99,13 +98,11 @@ export default function VisitsPage() {
       title: "Дата посещения",
       dataIndex: "created_at",
       key: "created_at",
-      sorter: (a: Visit, b: Visit) =>
+      sorter: (a: ScheduleVisit, b: ScheduleVisit) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       defaultSortOrder: "descend" as const,
       render: (createdAt: string) => (
-        <span>
-          {format(parseISO(createdAt), "dd MMMM yyyy, HH:mm", { locale: ru })}
-        </span>
+        <span>{dayjs(createdAt).format("DD MMMM YYYY, HH:mm")}</span>
       ),
     },
   ];

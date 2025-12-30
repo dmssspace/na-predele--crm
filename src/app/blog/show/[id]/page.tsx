@@ -11,9 +11,6 @@ export default function BlogPostShow() {
   const { result: record, query } = useShow({});
   const { isLoading } = query;
 
-  // TODO: ...
-  //       "media": null
-
   return (
     <Show isLoading={isLoading}>
       <Title level={5}>{"ID"}</Title>

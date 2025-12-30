@@ -16,11 +16,12 @@ import {
   PlayCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { Ticket } from "@/types/ticket";
 
 const { Text } = Typography;
 
 export default function TicketList() {
-  const { tableProps } = useTable({
+  const { tableProps } = useTable<Ticket>({
     syncWithLocation: true,
     resource: "tickets",
   });
@@ -102,7 +103,11 @@ export default function TicketList() {
                 type="link"
                 size="small"
                 icon={<ArrowRightOutlined />}
-                onClick={() => show("tickets/plans", record.package.plan.id)}
+                onClick={() => {
+                  if (record.package?.plan?.id !== undefined) {
+                    show("tickets/plans", record.package.plan.id);
+                  }
+                }}
               />
             }
             style={{ height: "100%" }}
@@ -263,18 +268,26 @@ export default function TicketList() {
           dataIndex="actions"
           width={100}
           fixed="right"
-          render={(_, record: BaseRecord) => (
+          render={(_, record: Ticket) => (
             <Space>
               <Button
                 size="small"
                 icon={<UserOutlined />}
-                onClick={() => show("customers", record.customer.id)}
+                onClick={() => {
+                  if (record?.customer?.id !== undefined) {
+                    show("customers", record.customer.id);
+                  }
+                }}
                 title="Перейти к клиенту"
               />
               <Button
                 size="small"
                 icon={<FileTextOutlined />}
-                onClick={() => show("tickets/plans", record.package.plan.id)}
+                onClick={() => {
+                  if (record.package?.plan?.id !== undefined) {
+                    show("tickets/plans", record.package.plan.id);
+                  }
+                }}
                 title="Перейти к тарифу"
               />
               {record.status === "active" && (

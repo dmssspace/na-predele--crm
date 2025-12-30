@@ -28,8 +28,6 @@ import {
   Typography,
   message,
 } from "antd";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import { EditableField } from "./EditableField";
@@ -60,12 +58,14 @@ export const CustomerEditDrawer = ({
 
   const { mutate: updateCustomer } = useUpdate();
 
-  const { data: visitsData, isLoading: visitsLoading } = useList({
+  const { query: visitsQuery } = useList({
     resource: `visits/customer/${id}`,
     queryOptions: {
       enabled: !!id,
     },
   });
+
+  const { data: visitsData, isLoading: visitsLoading } = visitsQuery;
 
   const { query } = useCustom({
     url: `/tickets/customer/${id}`,
@@ -455,12 +455,8 @@ export const CustomerEditDrawer = ({
                 displayValue={
                   <Text>
                     {editQuery?.data?.data?.birth_date
-                      ? format(
-                          new Date(editQuery.data.data.birth_date),
-                          "dd.MM.yyyy",
-                          {
-                            locale: ru,
-                          }
+                      ? dayjs(new Date(editQuery.data.data.birth_date)).format(
+                          "DD.MM.YYYY"
                         )
                       : "-"}
                   </Text>
@@ -599,10 +595,8 @@ export const CustomerEditDrawer = ({
                       <Text type="secondary">Действителен до:</Text>
                       <Text>
                         {activeTicket.end_date
-                          ? format(
-                              new Date(activeTicket.end_date),
-                              "dd.MM.yyyy",
-                              { locale: ru }
+                          ? dayjs(new Date(activeTicket.end_date)).format(
+                              "DD.MM.YYYY"
                             )
                           : "-"}
                       </Text>
@@ -636,17 +630,13 @@ export const CustomerEditDrawer = ({
                     <Flex justify="space-between" style={{ width: "100%" }}>
                       <Text>
                         {visit.check_in_time || visit.date || visit.created_at
-                          ? format(
+                          ? dayjs(
                               new Date(
                                 visit.check_in_time ||
                                   visit.date ||
                                   visit.created_at
-                              ),
-                              "dd.MM.yyyy HH:mm",
-                              {
-                                locale: ru,
-                              }
-                            )
+                              )
+                            ).format("DD.MM.YYYY HH:mm")
                           : "-"}
                       </Text>
                       <Tag

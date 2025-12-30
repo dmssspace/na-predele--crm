@@ -1,6 +1,8 @@
 "use client";
 
 import { Create, useForm, useSelect } from "@refinedev/antd";
+import { Customer } from "@/types/customer";
+import { TicketPlan, TicketPlanPackage } from "@/types/ticket";
 import { Form, Select } from "antd";
 
 export default function TicketCreate() {
@@ -23,38 +25,39 @@ export default function TicketCreate() {
 
   const selectedPlanID = Form.useWatch("ticket_plan_id", form);
 
-  const { selectProps: customerSelectProps } = useSelect({
+  const { selectProps: customerSelectProps } = useSelect<Customer>({
     resource: "customers",
     optionLabel: "full_name",
     optionValue: "id",
   });
 
-  const { selectProps: ticketPlanSelectProps } = useSelect({
+  const { selectProps: ticketPlanSelectProps } = useSelect<TicketPlan>({
     resource: "tickets/plans",
     optionLabel: "name",
     optionValue: "id",
   });
 
-  const { selectProps: ticketPlanPackageSelectProps } = useSelect({
-    resource: selectedPlanID
-      ? `tickets/plans/${selectedPlanID}/packages`
-      : "",
-    queryOptions: {
-      enabled: !!selectedPlanID,
-    },
-    optionLabel: (item) => {
-      const duration = item.duration_days ? `${item.duration_days} дней` : "";
-      const sessions = item.total_sessions
-        ? `${item.total_sessions} занятий`
-        : "";
-      const price = item.price ? `${item.price} ₽` : "";
+  const { selectProps: ticketPlanPackageSelectProps } =
+    useSelect<TicketPlanPackage>({
+      resource: selectedPlanID
+        ? `tickets/plans/${selectedPlanID}/packages`
+        : "",
+      queryOptions: {
+        enabled: !!selectedPlanID,
+      },
+      optionLabel: (item) => {
+        const duration = item.duration_days ? `${item.duration_days} дней` : "";
+        const sessions = item.total_sessions
+          ? `${item.total_sessions} занятий`
+          : "";
+        const price = item.price ? `${item.price} ₽` : "";
 
-      return `${duration}${sessions ? ", " + sessions : ""}${
-        price ? " - " + price : ""
-      }`;
-    },
-    optionValue: "id",
-  });
+        return `${duration}${sessions ? ", " + sessions : ""}${
+          price ? " - " + price : ""
+        }`;
+      },
+      optionValue: "id",
+    });
 
   return (
     <Create saveButtonProps={saveButtonProps}>

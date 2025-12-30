@@ -1,16 +1,13 @@
 "use client";
 
-import { PlusOutlined } from "@ant-design/icons";
 import {
-  CreateButton,
-  DeleteButton,
   EditButton,
-  ImageField,
   List,
   ShowButton,
   useTable,
 } from "@refinedev/antd";
 import { type BaseRecord, useApiUrl, useNotification } from "@refinedev/core";
+import { TicketPlan } from "@/types/ticket";
 import {
   Space,
   Table,
@@ -38,7 +35,7 @@ interface TicketPlanPackage {
 }
 
 export default function TicketPlanList() {
-  const { result, tableProps } = useTable({
+  const { result, tableProps } = useTable<TicketPlan>({
     syncWithLocation: true,
     resource: "tickets/plans",
   });
@@ -167,7 +164,7 @@ export default function TicketPlanList() {
     }
   };
 
-  const expandedRowRender = (record: BaseRecord) => {
+  const expandedRowRender = (record: TicketPlan) => {
     const packages = expandedPackages[record.id] || [];
 
     if (packages.length === 0) {
@@ -375,7 +372,7 @@ export default function TicketPlanList() {
       <Table
         {...tableProps}
         rowKey="id"
-        onRow={(record) => ({
+        onRow={(record: TicketPlan) => ({
           onClick: (event) => {
             // Не разворачивать, если клик был на кнопке действия
             const target = event.target as HTMLElement;
@@ -452,7 +449,7 @@ export default function TicketPlanList() {
           title={"Действия"}
           dataIndex="actions"
           width={150}
-          render={(_, record: BaseRecord) => (
+          render={(_, record: TicketPlan) => (
             <Space>
               <EditButton hideText size="small" recordItemId={record?.id} />
               <ShowButton hideText size="small" recordItemId={record?.id} />

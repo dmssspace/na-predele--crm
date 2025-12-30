@@ -8,10 +8,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import BookingsCard from "@/components/schedule/BookingsCard";
-import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
 import type { ScheduleSession } from "@/types/schedule";
 import { DateField } from "@refinedev/antd";
+import dayjs from "dayjs";
 
 const { Text } = Typography;
 
@@ -94,11 +93,8 @@ export default function SessionDetailsDrawer({
                     <Text type="secondary">Время тренировки</Text>
                   </Space>
                   <Space>
-                    {format(parseISO(session.start_at), "HH:mm", {
-                      locale: ru,
-                    })}{" "}
-                    -{" "}
-                    {format(parseISO(session.end_at), "HH:mm", { locale: ru })}
+                    {dayjs(session.start_at).format("HH:mm")} -{" "}
+                    {dayjs(session.end_at).format("HH:mm")}
                   </Space>
                 </Flex>
               </List.Item>

@@ -23,13 +23,13 @@ import {
   Alert,
   message,
 } from "antd";
-import { format, parseISO } from "date-fns";
-import { ru } from "date-fns/locale";
-import type { Session, CustomerSearchResult, Ticket } from "@/types/schedule";
+import type { ScheduleSession } from "@/types/schedule";
 import { scheduleApi } from "@/lib/api/schedule";
+import { Customer } from "@/types/customer";
+import { Ticket } from "@/types/ticket";
 
 interface BookSessionModalProps {
-  session: Session;
+  session: ScheduleSession;
   onClose: () => void;
   onSuccess?: () => void;
 }
@@ -43,13 +43,13 @@ export default function BookSessionModal({
   const [form] = Form.useForm();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCustomer, setSelectedCustomer] =
-    useState<CustomerSearchResult | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
   const [useTicket, setUseTicket] = useState(true);
 
-  // Search customers
   const searchQueryCustom = useCustom<{
-    data: CustomerSearchResult[];
+    data: Customer[];
   }>({
     url: "/customers/search",
     method: "get",
@@ -87,7 +87,7 @@ export default function BookSessionModal({
     }
   };
 
-  const handleSelectCustomer = (customer: CustomerSearchResult) => {
+  const handleSelectCustomer = (customer: Customer) => {
     setSelectedCustomer(customer);
     form.setFieldsValue({ customer_id: customer.id });
   };
@@ -134,7 +134,7 @@ export default function BookSessionModal({
     }
   };
 
-  const activeTickets = ticketsData?.data?.data || [];
+  const activeTickets = ticketsData?.data || [];
   const isFull = session.bookings_count >= session.event.clients_cap;
   const canBook =
     selectedCustomer && (!useTicket || form.getFieldValue("ticket_id"));
@@ -214,11 +214,11 @@ export default function BookSessionModal({
             </Button>
           </Space.Compact>
 
-          {searchResults?.data?.data && searchResults.data.data.length > 0 && (
+          {searchResults?.data && searchResults.data.length > 0 && (
             <Card size="small" style={{ marginTop: 8 }}>
               <List
-                dataSource={searchResults.data.data}
-                renderItem={(customer: CustomerSearchResult) => (
+                dataSource={searchResults.data}
+                renderItem={(customer: Customer) => (
                   <List.Item
                     onClick={() => handleSelectCustomer(customer)}
                     style={{

@@ -6,7 +6,7 @@ import { PlusOutlined, InboxOutlined } from "@ant-design/icons";
 import type { UploadFile, RcFile } from "antd/es/upload/interface";
 import axios from "axios";
 import { API_URL } from "@providers/constants";
-import type { MediaFile } from "@/types/media";
+import type { Media } from "@/types/media";
 
 interface MediaUploaderProps {
   mode?: "picture-card" | "picture" | "dragger";
@@ -14,8 +14,8 @@ interface MediaUploaderProps {
   accept?: string;
   maxSize?: number;
   showPreview?: boolean;
-  onUploadSuccess?: (files: MediaFile[]) => void;
-  defaultFiles?: MediaFile[];
+  onUploadSuccess?: (files: Media[]) => void;
+  defaultFiles?: Media[];
   uploadText?: string;
   uploadHint?: string;
   showUploadMessages?: boolean;
@@ -39,9 +39,9 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   const [fileList, setFileList] = useState<UploadFile[]>(
     defaultFiles.map((file) => ({
       uid: file.id,
-      name: file.filename,
+      name: file.id,
       status: "done",
-      url: file.url,
+      url: file.public_url,
     }))
   );
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -65,9 +65,14 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
       const acceptTypes = accept.split(",").map((type) => type.trim());
       const fileType = file.type;
       const fileName = file.name;
-      
-      console.log("Checking file type:", { accept, acceptTypes, fileType, fileName });
-      
+
+      console.log("Checking file type:", {
+        accept,
+        acceptTypes,
+        fileType,
+        fileName,
+      });
+
       const isAccepted = acceptTypes.some((type) => {
         if (type.startsWith(".")) {
           return fileName.endsWith(type);
@@ -128,7 +133,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
         throw new Error("Некорректный ответ от сервера");
       }
 
-      const uploadedFile: MediaFile = uploadedMedia[0];
+      const uploadedFile: Media = uploadedMedia[0];
 
       if (!uploadedFile.id) {
         throw new Error("Загруженный файл не имеет ID");
@@ -151,7 +156,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
             ? {
                 ...f,
                 status: "done" as const,
-                url: uploadedFile.url,
+                url: uploadedFile.public_url,
                 uid: uploadedFile.id,
               }
             : f

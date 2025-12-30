@@ -10,7 +10,7 @@ import {
   FileOutlined,
 } from "@ant-design/icons";
 import { useMany } from "@refinedev/core";
-import type { MediaFile } from "@/types/media";
+import { Media } from "@/types/media";
 
 interface CombinedMediaPickerProps {
   value?: string[];
@@ -33,7 +33,7 @@ export const CombinedMediaPicker: React.FC<CombinedMediaPickerProps> = ({
 }) => {
   const {
     query: { data: mediaData },
-  } = useMany<MediaFile>({
+  } = useMany<Media>({
     resource: "media",
     ids: value,
     queryOptions: {
@@ -43,7 +43,7 @@ export const CombinedMediaPicker: React.FC<CombinedMediaPickerProps> = ({
 
   const selectedMedia = mediaData?.data || [];
 
-  const handleUploadSuccess = (files: MediaFile[]) => {
+  const handleUploadSuccess = (files: Media[]) => {
     const newIds = files.filter((f) => f && f.id).map((f) => f.id);
 
     if (newIds.length === 0) {
@@ -142,7 +142,7 @@ export const CombinedMediaPicker: React.FC<CombinedMediaPickerProps> = ({
                     <div style={{ height: 100, overflow: "hidden" }}>
                       <Image
                         src={media.public_url}
-                        alt={media.filename || "Media"}
+                        alt={"Media"}
                         height={100}
                         width="100%"
                         style={{ objectFit: "cover" }}

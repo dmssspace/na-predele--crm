@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Modal, Form, Select, Button, Radio, Spin, message } from "antd";
+import { useEffect, useMemo } from "react";
+import { Modal, Form, Select, Button, Radio, message } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { scheduleApi, ticketsApi } from "@/lib/api/schedule";
-import type { CustomerTicket } from "@/types/schedule";
+
+import { scheduleApi } from "@/lib/api/schedule";
+import { ticketsApi } from "@/lib/api/tickets";
+
+import type { Ticket } from "@/types/ticket";
 
 type Props = {
   bookingId?: string | null;
@@ -32,7 +35,7 @@ export default function RegisterVisitModal({
     enabled: !!customerId,
   });
 
-  const tickets: CustomerTicket[] = React.useMemo(
+  const tickets: Ticket[] = useMemo(
     () => ticketsResponse?.data ?? [],
     [ticketsResponse?.data]
   );
@@ -93,7 +96,7 @@ export default function RegisterVisitModal({
         onClose();
       }}
       footer={null}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}
@@ -108,7 +111,7 @@ export default function RegisterVisitModal({
             showSearch
             placeholder="Выберите абонемент (необязательно)"
             options={tickets.map((t) => ({
-              label: `${t.package?.plan.name} ${t.package?.duration_days} дней (Осталось ${t.remaining_sessions} визитов)`,
+              label: `${t.package?.plan?.name} ${t.package?.duration_days} дней (Осталось ${t.remaining_sessions} визитов)`,
               value: t.id,
             }))}
             loading={isTicketsLoading}

@@ -2,7 +2,6 @@
 
 import { humanizeBlogCategoryTitle } from "@lib/format/humanize";
 import {
-  DateField, // TODO: использовать для полей с датой
   DeleteButton,
   EditButton,
   List,
@@ -14,7 +13,7 @@ import { type BaseRecord } from "@refinedev/core";
 import { Space, Table } from "antd";
 
 export default function BlogPostList() {
-  const { result, tableProps } = useTable({
+  const { tableProps } = useTable({
     syncWithLocation: true,
     resource: "blog",
   });

@@ -14,10 +14,9 @@ import {
 } from "@refinedev/antd";
 import { type BaseRecord } from "@refinedev/core";
 import { Button, Space, Table } from "antd";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
 import { Avatar } from "@/components/avatar";
 import { TrainerEditDrawer, TrainerCreateDrawer } from "@/components/trainers";
+import dayjs from "dayjs";
 
 export default function BlogPostList() {
   const { result, tableProps } = useTable({
@@ -197,7 +196,7 @@ export default function BlogPostList() {
                 return "-";
               }
 
-              return format(date, "dd.MM.yyyy", { locale: ru });
+              return dayjs(date).format("DD.MM.YYYY");
             }}
           />
           <Table.Column

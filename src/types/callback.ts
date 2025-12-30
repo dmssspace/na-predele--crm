@@ -16,10 +16,16 @@ export interface CallbackRequest {
   type: CallbackType;
   status: CallbackStatus;
   comment?: string;
-  metadata?: Record<string, any>;
+  metadata?: CallbackMetadata;
   created_at: string;
   updated_at: string;
   assignee_user?: User;
+}
+
+export interface CallbackMetadata {
+  trainer_id?: string;
+  ticket_plan_id?: string;
+  duration_days?: number;
 }
 
 export interface SubmitCallbackRequest {
@@ -28,9 +34,22 @@ export interface SubmitCallbackRequest {
   email?: string;
   consent_to_personal_data_processing: boolean;
   type: CallbackType;
-  metadata?: Record<string, any>;
+  metadata?: CallbackMetadata;
 }
 
 export interface SolveCallbackRequest {
   comment?: string;
 }
+
+export const humanizeCallbackStatus = (status: CallbackStatus): string => {
+  switch (status) {
+    case "new":
+      return "Новая";
+    case "processing":
+      return "В обработке";
+    case "completed":
+      return "Обработана";
+    default:
+      return status;
+  }
+};
